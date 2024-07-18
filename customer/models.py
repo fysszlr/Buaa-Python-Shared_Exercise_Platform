@@ -37,9 +37,17 @@ class UserGroup(models.Model):
 #题目
 class Problem(models.Model):
     #内置id
+    TYPE_CHOICES = [
+        (0, '判断题'),
+        (1, '单选题'),
+        (2, '多选题'),
+        (10, '填空题'),
+    ]
+    type = models.IntegerField(choices=TYPE_CHOICES)    #题目类型
     name = models.CharField(max_length=32)
     tags = models.JSONField(default=list)  #标签
     content = models.TextField()    #题面
+    option = models.JSONField(blank=True, null=True)    #选项
     answer = models.TextField() #答案
     author = models.IntegerField()  #创建者，用户id
 
@@ -69,3 +77,4 @@ def add_initial_data(sender, **kwargs):
 
 # python manage.py makemigrations
 # python manage.py migrate
+# python manage.py runserver

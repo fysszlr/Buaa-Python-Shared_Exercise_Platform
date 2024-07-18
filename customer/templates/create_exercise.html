@@ -1,0 +1,123 @@
+<!-- customer/templates/customer/create_exercise.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建题目</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+        }
+        input, select, textarea {
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>创建题目</h1>
+        <form id="exerciseForm" method="post">
+            {% csrf_token %}
+            <label for="type">题目类型</label>
+            <select name="type" id="type">
+                <option value="0">判断题</option>
+                <option value="1">单选题</option>
+                <option value="2">多选题</option>
+                <option value="10">填空题</option>
+            </select>
+
+            <label for="title">题目标题</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="content">题目正文</label>
+            <textarea id="content" name="content" rows="4" required></textarea>
+
+            <label for="option">选项 (对于单选题或多选题)</label>
+            <textarea id="option" name="option" rows="4" placeholder="用逗号分隔选项，例如: 选项A, 选项B"></textarea>
+
+            <label for="answer">答案</label>
+            <textarea id="answer" name="answer" rows="4" required></textarea>
+
+            <label for="tagid">题目组ID (用逗号分隔)</label>
+            <input type="text" id="tagid" name="tagid" required>
+
+            <button type="submit">提交</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('exerciseForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const type = document.getElementById('type').value;
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const option = document.getElementById('option').value.split(',').map(item => item.trim());
+            const answer = document.getElementById('answer').value.split(',').map(item => item.trim());
+            const tagid = document.getElementById('tagid').value.split(',').map(item => parseInt(item.trim()));
+
+            const payload = {
+                type: parseInt(type),
+                title: title,
+                content: content,
+                option: option.filter(Boolean), // 过滤掉空选项
+                answer: answer.filter(Boolean), // 过滤掉空答案
+                tagid: tagid
+            };
+
+            fetch("{% url 'create_exercise' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('提交失败: ' + JSON.stringify(data.error));
+                } else {
+                    alert('提交成功! 题目ID: ' + data.data);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

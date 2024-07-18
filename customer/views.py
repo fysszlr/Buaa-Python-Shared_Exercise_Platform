@@ -1,5 +1,6 @@
 from django.shortcuts import render
 import datetime
+import json
 
 # Create your views here.
 
@@ -123,4 +124,37 @@ class getAllUsers(View):
             else:
                 userinfo['isblock']=False
             response['data']['users'].append(userinfo)
+        return JsonResponse(response)
+
+class createExercise(View):
+    def get(self, request):
+        return render(request, 'create_exercise.html')
+    
+    def post(self, request):
+        response=request_template.copy()
+        data = json.loads(request.body)
+
+        if(data['type'] not in [0,1,2,10]):
+            response['success']=False
+            response['errCode']=400401
+            return JsonResponse(response)
+        for i in data['tagid']:
+            if ProblemGroup.objects.filter(id=i).exists()==False:
+                response['success']=False
+                response['errCode']=400402
+                return JsonResponse(response)
+        
+        #TODO:标题、正文、选项、答案的合规性审查,如何获取autor?
+
+        exercise = Problem.objects.create(
+            type=data['type'],
+            name=data['title'],
+            content=data['content'],
+            option=data.get('option', []),
+            answer=data['answer'],
+            tags=data['tagid'],
+            author=0#data['author']
+        )
+        response['data']={'exerciseid':exercise.id}
+        print(exercise.__str__())
         return JsonResponse(response)
