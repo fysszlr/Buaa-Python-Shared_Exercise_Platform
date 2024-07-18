@@ -11,7 +11,7 @@ class UserInfo(models.Model):
     #{subject}-chapter{chapternum}
     name = models.CharField(max_length=32)
     password = models.CharField(max_length=128)
-    studentId = models.CharField(max_length=32,null=True,blank=True)    #学号
+    studentId = models.CharField(max_length=32,default="")    #学号
     groups = models.JSONField(default=list) #用户组id，形式为列表
     problems = models.JSONField(default=list)   #[num],自己创建的题目
     head = models.ImageField(upload_to='static/img/', default='static/img/default.png')  #头像

@@ -107,3 +107,20 @@ class AdminLoginView(View):
             response['errCode']=100301
             response['success']=False
             return JsonResponse(response)
+
+class getAllUsers(View):
+    def get(self, request):
+        response=request_template.copy()
+        response['data']={'users':[]}
+        for user in UserInfo.objects.all():
+            userinfo={}
+            userinfo['userid']=user.id
+            userinfo['username']=user.name
+            userinfo['avatarurl']=user.head.url
+            userinfo['studentid']=user.studentId
+            if BannedUser.objects.filter(user=user.id).exists():
+                userinfo['isblock']=True
+            else:
+                userinfo['isblock']=False
+            response['data']['users'].append(userinfo)
+        return JsonResponse(response)
