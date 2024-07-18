@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'customer.apps.CustomerConfig',
 ]
 
 MIDDLEWARE = [
@@ -73,13 +74,35 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'test',
+        'USER': 'root',
+        'PASSWORD': 'mysql123',
+        'HOST': 'localhost',
+        'PORT': 3306,
     }
 }
 
+# CACHES = {
+#         "default": {
+#             "BACKEND": "django_redis.cache.RedisCache",
+#             "LOCATION": "redis://127.0.0.1:6379",
+#             "OPTIONS": {
+#                 "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#                 "CONNECTION_POOL_KWARGS": {"max_connections": 100}
+#                 # "PASSWORD": "123",
+#             }
+#         }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
