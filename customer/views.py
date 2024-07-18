@@ -134,14 +134,14 @@ class createExercise(View):
         response=request_template.copy()
         data = json.loads(request.body)
 
-        if(data['type'] not in [0,1,2,10]):
+        if data['type'] not in [0,1,2,10]:
             response['success']=False
-            response['errCode']=400401
+            response['errCode']=400101
             return JsonResponse(response)
         for i in data['tagid']:
             if ProblemGroup.objects.filter(id=i).exists()==False:
                 response['success']=False
-                response['errCode']=400402
+                response['errCode']=400102
                 return JsonResponse(response)
         
         #TODO:标题、正文、选项、答案的合规性审查,如何获取autor?
@@ -156,5 +156,44 @@ class createExercise(View):
             author=0#data['author']
         )
         response['data']={'exerciseid':exercise.id}
-        print(exercise.__str__())
+        return JsonResponse(response)
+
+class updateExercise(View):
+    def get(self, request):
+        return render(request, 'create_exercise.html')
+    
+    def post(self, request):
+        response=request_template.copy()
+        data = json.loads(request.body)
+        exerciseid = data['exerciseid']
+        newdata = data['newdata']
+        userid = 0  #如何获取当前用户id
+        
+
+        if Problem.objects.filter(id=exerciseid).author!=userid:
+            response['success']=False
+            response['errCode']=400201
+            return JsonResponse(response)
+        if data['type'] not in [0,1,2,10]:
+            response['success']=False
+            response['errCode']=400202
+            return JsonResponse(response)
+        for i in data['tagid']:
+            if ProblemGroup.objects.filter(id=i).exists()==False:
+                response['success']=False
+                response['errCode']=400403
+                return JsonResponse(response)
+        
+        #TODO:标题、正文、选项、答案的合规性审查,如何获取autor?
+
+        #更新数据
+        exercise = Problem.objects.get(id=exerciseid)
+        exercise.type = data['type']
+        exercise.name = data['title']
+        exercise.content = data['content']
+        exercise.option = data.get('option', [])
+        exercise.answer = data['answer']
+        exercise.tags = data['tagid']
+        exercise.save()
+        response['data']={'exerciseid':exercise.id}
         return JsonResponse(response)
