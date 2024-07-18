@@ -1,6 +1,7 @@
 /backend/__pycache__
 /customer/__pycache__
 /customer/migrations/__pycache__
-/customer/migrations/*_initial.py
+/customer/migrations/
+!customer/migrations/__init__.py
 .idea
 .vscode

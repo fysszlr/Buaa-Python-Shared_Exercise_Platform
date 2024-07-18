@@ -7,7 +7,7 @@ import datetime
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
-from .models import UserInfo,BannedUser
+from .models import *
 from django.views import View
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -37,6 +37,7 @@ class UserRegisterView(View):
 
         # 创建并保存用户
         user=UserInfo.objects.create(name=username, password=password,log=str(datetime.datetime.now())+' 创建用户')
+        user.groups.append(1)
         return JsonResponse(response)
 
 # 获取用户信息的视图,待更改
@@ -77,5 +78,32 @@ class UserLoginView(View):
         except UserInfo.DoesNotExist:
             #用户不存在
             response['errCode']=100101
+            response['success']=False
+            return JsonResponse(response)
+
+# 管理员登录验证视图
+class AdminLoginView(View):
+    def get(self, request):
+        return render(request, 'login_admin.html')
+
+    def post(self, request):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        response=request_template.copy()
+
+        try:
+            admin = AdminInfo.objects.get(name=username)
+            if password == admin.password:
+                #成功登录
+                response['data']={'token':admin.token}
+                return JsonResponse(response)
+            else:
+                #密码错误
+                response['errCode']=100301
+                response['success']=False
+                return JsonResponse(response)
+        except AdminInfo.DoesNotExist:
+            #用户不存在
+            response['errCode']=100301
             response['success']=False
             return JsonResponse(response)

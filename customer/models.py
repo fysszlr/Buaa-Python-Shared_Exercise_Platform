@@ -1,7 +1,10 @@
 from django.db import models
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
 
 # Create your models here.
 
+#TODO:使用redis,使用token验证
 #用户
 class UserInfo(models.Model):
     #内置id
@@ -9,7 +12,7 @@ class UserInfo(models.Model):
     name = models.CharField(max_length=32)
     password = models.CharField(max_length=128)
     studentId = models.CharField(max_length=32,null=True,blank=True)    #学号
-    groups = models.JSONField(default=[0]) #用户组id，形式为列表
+    groups = models.JSONField(default=list) #用户组id，形式为列表
     problems = models.JSONField(default=list)   #[num],自己创建的题目
     head = models.ImageField(upload_to='static/img/', default='static/img/default.png')  #头像
     log = models.JSONField(default=list)    #日志
@@ -21,6 +24,7 @@ class UserInfo(models.Model):
 class AdminInfo(models.Model):
     name = models.CharField(max_length=32)
     password = models.CharField(max_length=128)
+    token = models.CharField(max_length=512)
 
 #用户组
 class UserGroup(models.Model):
@@ -56,6 +60,12 @@ class BannedUser(models.Model):
 class BannedProblem(models.Model):
     problem = models.IntegerField() #[id],用户组id
     #time = models.DateTimeField()  #封禁时间
+
+@receiver(post_migrate)
+def add_initial_data(sender, **kwargs):
+    # 创建一个管理员账户
+    if sender.name == 'customer':  # 确保只在特定应用中运行
+        AdminInfo.objects.get_or_create(name='root', password='000000')
 
 # python manage.py makemigrations
 # python manage.py migrate
