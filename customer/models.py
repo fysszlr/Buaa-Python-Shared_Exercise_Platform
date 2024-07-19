@@ -33,7 +33,7 @@ class UserGroup(models.Model):
     name = models.CharField(max_length=32)
     creator = models.IntegerField() #创建者，用户id
     users = models.JSONField(default=list)    #[id],用户id
-    problems = models.JSONField(default=list) #[num],题目组id
+    problemGroups = models.JSONField(default=list) #[num],题目组id
 
 #题目
 class Problem(models.Model):

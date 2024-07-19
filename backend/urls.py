@@ -33,4 +33,12 @@ urlpatterns = [
     path('Tag/addExerciseToTag/', addExerciseToTag.as_view(), name='add_exercise_to_tag'),
     path('Tag/getExerciseFromTag/', getExerciseFromTag.as_view(), name='get_exercise_from_tag'),
     path('Tag/getCurrentUserTag/', getCurrentUserTag.as_view(), name='get_current_user_tag'),
+    path('Group/createGroup/', createGroup.as_view(), name='create_group'),
+    path('Group/deleteGroup/', deleteGroup.as_view(), name='delete_group'),
+    path('Group/joinGroup/', joinGroup.as_view(), name='join_group'),
+    path('Group/exitGroup/', exitGroup.as_view(), name='exit_group'),
+    path('Group/addTagToGroup/', addTagToGroup.as_view(), name='add_tag_to_group'),
+    path('Group/getTagFromGroup/', getTagFromGroup.as_view(), name='get_tag_from_group'),
+    path('Group/getCurrentUserGroup/', getCurrentUserGroup.as_view(), name='get_current_user_group'),
+    
 ]
