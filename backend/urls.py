@@ -29,4 +29,8 @@ urlpatterns = [
     path('Exercise/getReachableExercise/', getReachableExercise.as_view(), name='get_Reachable_exercise'),
     path('Exercise/getExerciseByID/', getExerciseByID.as_view(), name='get_exercise_by_id'),
     path('Exercise/searchExercise/', searchExercise.as_view(), name='search_exercise'),
+    path('Tag/createTag/', createTag.as_view(), name='create_tag'),
+    path('Tag/addExerciseToTag/', addExerciseToTag.as_view(), name='add_exercise_to_tag'),
+    path('Tag/getExerciseFromTag/', getExerciseFromTag.as_view(), name='get_exercise_from_tag'),
+    path('Tag/getCurrentUserTag/', getCurrentUserTag.as_view(), name='get_current_user_tag'),
 ]
