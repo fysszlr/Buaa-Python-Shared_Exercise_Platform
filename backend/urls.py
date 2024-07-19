@@ -26,5 +26,7 @@ urlpatterns = [
     path('Admin/getAllUser/', getAllUsers.as_view(), name='admin_get_all_users'),
     path('Exercise/createExercise/', createExercise.as_view(), name='create_exercise'),
     path('Exercise/updateExercise/', updateExercise.as_view(), name='create_exercise'),
-    path('get/<str:username>/', GetCustomerView.as_view(), name='get_customer'),
+    path('Exercise/getReachableExercise/', getReachableExercise.as_view(), name='get_Reachable_exercise'),
+    path('Exercise/getExerciseByID/', getExerciseByID.as_view(), name='get_exercise_by_id'),
+    path('Exercise/searchExercise/', searchExercise.as_view(), name='search_exercise'),
 ]

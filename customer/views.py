@@ -109,6 +109,7 @@ class AdminLoginView(View):
             response['success']=False
             return JsonResponse(response)
 
+
 class getAllUsers(View):
     def get(self, request):
         response=request_template.copy()
@@ -125,6 +126,7 @@ class getAllUsers(View):
                 userinfo['isblock']=False
             response['data']['users'].append(userinfo)
         return JsonResponse(response)
+
 
 class createExercise(View):
     def get(self, request):
@@ -158,6 +160,7 @@ class createExercise(View):
         response['data']={'exerciseid':exercise.id}
         return JsonResponse(response)
 
+
 class updateExercise(View):
     def get(self, request):
         return render(request, 'create_exercise.html')
@@ -169,7 +172,6 @@ class updateExercise(View):
         newdata = data['newdata']
         userid = 0  #如何获取当前用户id
         
-
         if Problem.objects.filter(id=exerciseid).author!=userid:
             response['success']=False
             response['errCode']=400201
@@ -196,4 +198,101 @@ class updateExercise(View):
         exercise.tags = data['tagid']
         exercise.save()
         response['data']={'exerciseid':exercise.id}
+        return JsonResponse(response)
+
+
+class getReachableExercise(View):
+    def get(self, request):
+        page = int(request.GET.get('page'))
+        problems=set(int)
+        userid=0  #如何获取当前用户id?
+        #TODO:效率如何？能否缓存？
+        #从大到小排序
+        problems=list(getReachableExercise.getReachableExercise(userid))
+        problems=sorted(problems,reverse=True)
+        pages=(problems.__sizeof__()+19)//20
+        if page>pages:
+            problems=[]
+        else:
+            problems=problems[20*(page-1):min(20*page,problems.__sizeof__())]
+        thispage=[]
+        for i in problems:
+            thispage.append(getExerciseByID.getExercise(i))
+        
+        response=request_template.copy()
+        response['data']={'thispage':thispage,'pages':pages}
+        return JsonResponse(response)
+    
+    def getReachableExercise(userid):
+        problems=set(int)
+        #所有共享群组
+        for userGroup in UserInfo.objects.get(id=userid).groups:
+            for problemGroup in UserGroup.objects.get(id=userGroup).problems:
+                problems=problems.union(set(ProblemGroup.objects.get(id=problemGroup).problems))
+        #自己创建的题目
+        problems=problems.union(set(UserInfo.objects.filter(id=userid).problems))
+        #去除被封禁的题目
+        for bannedProblem in BannedProblem.objects.all():
+            problems.remove(bannedProblem.problem)
+        return problems
+
+
+class getExerciseByID(View):
+    def get(self, request):
+        exerciseid = request.GET.get('exerciseid')
+        data=getExerciseByID.getExercise(exerciseid)
+        response=request_template.copy()
+        response['isBlock']=data.pop('isBlock')
+        response['data']=data   #或者data中包含data和isblock？
+        return JsonResponse(response)
+
+    def getExercise(exerciseid):
+        if Problem.objects.filter(id=exerciseid).exists()==False:
+            return {}
+        problem=Problem.objects.get(id=exerciseid)
+        exercise={}
+        exercise['exerciseid']=problem.id
+        exercise['createusername']=UserInfo.objects.get(id=problem.author).name
+        exercise['type']=problem.type
+        exercise['title']=problem.name
+        exercise['content']=problem.content
+        exercise['option']=problem.option
+        exercise['answer']=problem.answer
+        tag=[]
+        for j in problem.tags:
+            tag.append({'tagid':j,'tagname':ProblemGroup.objects.get(id=j).name})
+        exercise['tag']=tag
+        if BannedProblem.objects.filter(problem=problem.id).exists():
+            exercise['isBlock']=True
+        else:
+            exercise['isBlock']=False
+        return exercise
+
+
+class searchExercise(View):
+    def get(self, request):
+        page = int(request.GET.get('page'))
+        type = int(request.GET.get('type'))
+        pattern = request.GET.get('pattern')
+        problems=set(int)
+        userid=0  #如何获取当前用户id?
+        problems=list(getReachableExercise.getReachableExercise(userid))
+        problems=sorted(problems,reverse=True)
+        thispage=[]
+        for i in problems:
+            exercise=getExerciseByID.getExercise(i)
+            if type=='title':
+                if pattern in exercise['title']:
+                    thispage.append(exercise)
+            elif type=='tag':
+                if pattern in exercise['tag']['tagname']:
+                    thispage.append(exercise)
+        pages=(thispage.__sizeof__()+19)//20
+        if page>pages:
+            thispage=[]
+        else:
+            thispage=thispage[20*(page-1):min(20*page,thispage.__sizeof__())]
+        
+        response=request_template.copy()
+        response['data']={'thispage':thispage,'pages':pages}
         return JsonResponse(response)
