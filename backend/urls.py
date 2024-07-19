@@ -40,5 +40,6 @@ urlpatterns = [
     path('Group/addTagToGroup/', addTagToGroup.as_view(), name='add_tag_to_group'),
     path('Group/getTagFromGroup/', getTagFromGroup.as_view(), name='get_tag_from_group'),
     path('Group/getCurrentUserGroup/', getCurrentUserGroup.as_view(), name='get_current_user_group'),
-    
+    path('Log/addWrongLog/', addWrongLog.as_view(), name='add_wrong_log'),
+    path('Log/addRightLog/', addRightLog.as_view(), name='add_right_log'),
 ]
