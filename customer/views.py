@@ -6,12 +6,6 @@ import json
 
 # customer/views.py
 
-#TODO:(问题)
-#getExerciseById类似的返回格式
-#用户组创建者退出后怎么办
-#用户可以随便加入用户组，而不经过创建者同意吗
-#只有用户同时是用户组创建者和题目组创建者才能添加题目组吗
-
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
 from .models import *
@@ -484,6 +478,10 @@ class exitGroup(View):
             response['success']=False
             response['errCode']=600402
             return JsonResponse(response)
+        if userid==UserGroup.objects.get(id=groupid).creator:
+            response['success']=False
+            response['errCode']=600403
+            return JsonResponse(response)
         group = UserGroup.objects.get(id=groupid)
         group.users.remove(userid)
         group.save()
@@ -518,10 +516,6 @@ class addTagToGroup(View):
             response['errCode']=600502
             return JsonResponse(response)
         group=UserGroup.objects.get(id=groupid)
-        if group.creator!=userid:
-            response['success']=False
-            response['errCode']=600502
-            return JsonResponse(response)
         group.problemGroups.append(tagid)
         group.save()
         return JsonResponse(response)
