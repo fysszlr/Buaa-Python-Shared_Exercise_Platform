@@ -6,13 +6,17 @@ import json
 
 # customer/views.py
 
-# TODO:系统层面log的记录(用户创建题目组、加入用户组等等)
+# TODO:
+# 系统层面log的记录(用户创建题目组、加入用户组等等)
+# 错题推荐算法
+# 与前端的适配
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse,JsonResponse
 from .models import *
 from django.views import View
 from django.contrib.auth.hashers import make_password, check_password
+from UserInfo.models import UserInfo
 
 request_template = {
     "success": True,
@@ -39,7 +43,7 @@ class UserRegisterView(View):
             return JsonResponse(response)
 
         # 创建并保存用户
-        user=UserInfo.objects.create(name=username, password=password,log=str(datetime.datetime.now())+' 创建用户')
+        user=UserInfo.objects.create(name=username, password=password,log=[(datetime.datetime.now().timestamp(),'注册成功')])
         user.groups.append(1)
         return JsonResponse(response)
 
@@ -71,6 +75,8 @@ class UserLoginView(View):
                     response['success']=False
                     return JsonResponse(response)
                 #成功登录
+                customer.log.append((datetime.datetime.now().timestamp(),'登录成功'))
+                customer.save()
                 response['data']={'token':customer.token}
                 return JsonResponse(response)
             else:
@@ -594,3 +600,12 @@ class addRightLog(View):
         UserInfo.objects.get(id=userid).save()
         response['data']={'timestamp':timestamp}
         return JsonResponse(response)
+
+
+class getCurrentEvaluation(View):
+    def get(self, request):
+        userid = 0  #如何获取当前用户id?
+        data={'score':[],'time':[]}
+        wrongSum=0
+        rightSum=0
+        
