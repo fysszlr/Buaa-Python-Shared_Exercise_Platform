@@ -2,9 +2,13 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('register/', views.UserRegisterView.as_view(), name='register_user'),
-    path('login/', views.UserLoginView.as_view(), name='login_user'),
-    path('adminLogin/', views.AdminLoginView.as_view(), name='login_admin'),
-    path('getAllUser/', views.getAllUsers.as_view(), name='admin_get_all_users'),
-
+    path('getAllUser/', views.GetAllUser, name="getAllUser"),
+    path('blockUser/', views.BlockUser, name="blockUser"),
+    path('unblockUser/', views.UnblockUser, name="unblockUser"),
+    path('getAllExercise', views.GetAllExercise, name="getAllExercise"),
+    path('blockExercise/', views.BlockExercise, name="blockExercise"),
+    path('unblockExercise/', views.UnblockExercise, name="unblockExercise"),
+    path('getAllAdmin/', views.GetAllAdmin, name="getAllAdmin"),
+    path('createAdmin/', views.CreateAdmin, name="createAdmin"),
+    path('deleteAdmin/', views.DeleteAdmin, name="deleteAdmin"),
 ]
