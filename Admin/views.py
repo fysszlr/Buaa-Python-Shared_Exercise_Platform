@@ -23,7 +23,7 @@ class UserRegisterView(View):
             return JsonResponse(response)
 
         # 创建并保存用户
-        user=UserInfo.objects.create(name=username, password=password,log=[(datetime.datetime.now().timestamp(),'注册成功')])
+        user=UserInfo.objects.create(name=username, password=password,log=[(datetime.datetime.now().timestamp(),'register')])
         user.groups.append(1)
         return JsonResponse(response)
 
@@ -55,7 +55,7 @@ class UserLoginView(View):
                     response['success']=False
                     return JsonResponse(response)
                 #成功登录
-                customer.log.append((datetime.datetime.now().timestamp(),'登录成功'))
+                customer.log.append((datetime.datetime.now().timestamp(),'login'))
                 customer.save()
                 response['data']={'token':customer.token}
                 return JsonResponse(response)
