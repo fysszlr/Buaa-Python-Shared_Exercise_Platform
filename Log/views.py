@@ -3,8 +3,10 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from UserInfo.models import UserInfo
 from backend.models import *
+from Exercise.views import *
 import datetime
 import json
+import random
 
 # Create your views here.
 
@@ -80,4 +82,29 @@ class getCurrentEvaluation(View):
 
         response=request_template.copy()
         response['data']=data
+        return JsonResponse(response)
+
+
+class getRecommendExercise(View):
+    def get(self, request):
+        userid = 0
+        getdata=json.loads(request.body)
+        pattern=getdata['pattern']
+        quantity=getdata['quantity']
+        problems = list(getReachableExercise.getReachableExercise(userid))
+        recommend=[]
+        for i in problems:
+            problem=Problem.objects.get(id=i)
+            tags=problem.tags
+            for tag in tags:
+                if tag==pattern:
+                    recommend.append(getExerciseByID.getExercise(i))
+                    break
+        if len(recommend)<quantity:
+            data={'satisfy':False,'recommend':recommend}
+        else:
+            data={'satisfy':True,'recommend':random.sample(recommend,quantity)}
+
+        response = request_template.copy()
+        response['data'] = data
         return JsonResponse(response)
