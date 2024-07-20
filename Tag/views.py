@@ -3,6 +3,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from UserInfo.models import UserInfo
 from backend.models import *
+from UserInfo.views import getUserId
 import json
 
 # Create your views here.
@@ -15,7 +16,7 @@ class createTag(View):
         response = request_template.copy()
         data = json.loads(request.body)
         tagname = data['tagname']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if ProblemGroup.objects.filter(name=tagname).exists():
             response['success'] = False
@@ -38,7 +39,7 @@ class addExerciseToTag(View):
         data = json.loads(request.body)
         tagid = data['tagid']
         exerciseid = data['exerciseid']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if ProblemGroup.objects.filter(id=tagid).exists() == False:
             response['success'] = False
@@ -65,7 +66,6 @@ class getExerciseFromTag(View):
         tagid = request.GET.get('tagid')
         page = int(request.GET.get('page'))
         problems = []
-        userid = 0  # 如何获取当前用户id?
         problems = ProblemGroup.objects.get(id=tagid).problems
         problems = sorted(problems, reverse=True)
         thispage = []
@@ -85,7 +85,7 @@ class getExerciseFromTag(View):
 
 class getCurrentUserTag(View):
     def get(self, request):
-        userid = 0  # 如何获取当前用户id?
+        userid = getUserId(request)
         tags = []
         for i in UserInfo.objects.get(id=userid).problemGroups:
             tags.append({'tagid': i, 'tagname': ProblemGroup.objects.get(id=i).name})

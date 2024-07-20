@@ -3,6 +3,7 @@ from django.views import View
 from django.http import JsonResponse
 from UserInfo.models import UserInfo
 from backend.models import *
+from UserInfo.views import getUserId
 import json
 from django.core.cache import cache
 # Create your views here.
@@ -25,7 +26,7 @@ class createExercise(View):
                 response['errCode'] = 400102
                 return JsonResponse(response)
 
-        # TODO:标题、正文、选项、答案的合规性审查,如何获取autor?
+        # TODO:标题、正文、选项、答案的合规性审查
 
         exercise = Problem.objects.create(
             type=data['type'],
@@ -34,7 +35,7 @@ class createExercise(View):
             option=data.get('option', []),
             answer=data['answer'],
             tags=data['tagid'],
-            author=0  # data['author']
+            author= getUserId(request)
         )
         response['data'] = {'exerciseid': exercise.id}
         return JsonResponse(response)
@@ -49,7 +50,7 @@ class updateExercise(View):
         data = json.loads(request.body)
         exerciseid = data['exerciseid']
         newdata = data['newdata']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if Problem.objects.filter(id=exerciseid).author != userid:
             response['success'] = False
@@ -65,7 +66,7 @@ class updateExercise(View):
                 response['errCode'] = 400403
                 return JsonResponse(response)
 
-        # TODO:标题、正文、选项、答案的合规性审查,如何获取autor?
+        # TODO:标题、正文、选项、答案的合规性审查
 
         # 更新数据
         exercise = Problem.objects.get(id=exerciseid)
@@ -84,7 +85,7 @@ class getReachableExercise(View):
     def get(self, request):
         page = int(request.GET.get('page'))
         problems = set(int)
-        userid = 0  # 如何获取当前用户id?
+        userid = getUserId(request)
         problems = cache.get(userid)
         if not problems:
             # 从大到小排序
@@ -156,7 +157,7 @@ class searchExercise(View):
         type = int(request.GET.get('type'))
         pattern = request.GET.get('pattern')
         problems = set(int)
-        userid = 0  # 如何获取当前用户id?
+        userid = getUserId(request)
         problems = list(getReachableExercise.getReachableExercise(userid))
         problems = sorted(problems, reverse=True)
         thispage = []

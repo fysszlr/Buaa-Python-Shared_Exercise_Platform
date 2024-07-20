@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from UserInfo.models import UserInfo
 from backend.models import *
 from Exercise.views import *
+from UserInfo.views import getUserId
 import datetime
 import json
 import random
@@ -18,7 +19,7 @@ class addWrongLog(View):
         response = request_template.copy()
         data = json.loads(request.body)
         exerciseid = data['exerciseid']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if Problem.objects.filter(id=exerciseid).exists() == False:
             response['success'] = False
@@ -39,7 +40,7 @@ class addRightLog(View):
         response = request_template.copy()
         data = json.loads(request.body)
         exerciseid = data['exerciseid']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if Problem.objects.filter(id=exerciseid).exists() == False:
             response['success'] = False
@@ -54,7 +55,7 @@ class addRightLog(View):
 
 class getCurrentEvaluation(View):
     def get(self, request):
-        userid=0
+        userid=getUserId(request)
         user=UserInfo.objects.get(id=userid)
         loginTime=[]
         for log in user.log:
@@ -87,7 +88,7 @@ class getCurrentEvaluation(View):
 
 class getRecommendExercise(View):
     def get(self, request):
-        userid = 0
+        userid = getUserId(request)
         getdata=json.loads(request.body)
         pattern=getdata['pattern']
         quantity=getdata['quantity']

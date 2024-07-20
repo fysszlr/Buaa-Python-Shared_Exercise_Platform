@@ -3,6 +3,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from UserInfo.models import UserInfo
 from backend.models import *
+from UserInfo.views import getUserId
 import json
 
 # Create your views here.
@@ -14,7 +15,7 @@ class createGroup(View):
         response = request_template.copy()
         data = json.loads(request.body)
         groupname = data['groupname']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         # if UserGroup.objects.filter(name=groupname).exists():
         #     response['success']=False
@@ -38,7 +39,7 @@ class deleteGroup(View):
         response = request_template.copy()
         data = json.loads(request.body)
         groupid = data['groupid']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
             response['success'] = False
@@ -65,7 +66,7 @@ class joinGroup(View):
         response = request_template.copy()
         data = json.loads(request.body)
         groupid = data['groupid']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
             response['success'] = False
@@ -91,7 +92,7 @@ class exitGroup(View):
         response = request_template.copy()
         data = json.loads(request.body)
         groupid = data['groupid']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
             response['success'] = False
@@ -122,7 +123,7 @@ class addTagToGroup(View):
         data = json.loads(request.body)
         groupid = data['groupid']
         tagid = data['tagid']
-        userid = 0  # 如何获取当前用户id
+        userid = getUserId(request)
 
         if ProblemGroup.objects.filter(id=tagid).exists() == False:
             response['success'] = False
@@ -161,7 +162,7 @@ class getTagFromGroup(View):
 
 class getCurrentUserGroup(View):
     def get(self, request):
-        userid = 0  # 如何获取当前用户id?
+        userid = getUserId(request)
         groups = []
         for i in UserInfo.objects.get(id=userid).groups:
             group = UserGroup.objects.get(id=i)
