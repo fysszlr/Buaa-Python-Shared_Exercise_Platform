@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from UserInfo.models import UserInfo
 from backend.models import *
 import json
+from django.core.cache import cache
 # Create your views here.
 
 class createExercise(View):
@@ -84,10 +85,12 @@ class getReachableExercise(View):
         page = int(request.GET.get('page'))
         problems = set(int)
         userid = 0  # 如何获取当前用户id?
-        # TODO:效率如何？能否缓存？
-        # 从大到小排序
-        problems = list(getReachableExercise.getReachableExercise(userid))
-        problems = sorted(problems, reverse=True)
+        problems = cache.get(userid)
+        if not problems:
+            # 从大到小排序
+            problems = list(getReachableExercise.getReachableExercise(userid))
+            problems = sorted(problems, reverse=True)
+            cache.set(userid, problems, 60*15)#缓存15分钟
         pages = (problems.__sizeof__() + 19) // 20
         if page > pages:
             problems = []
