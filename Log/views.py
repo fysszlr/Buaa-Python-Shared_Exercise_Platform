@@ -49,3 +49,35 @@ class addRightLog(View):
         response['data'] = {'timestamp': timestamp}
         return JsonResponse(response)
 
+
+class getCurrentEvaluation(View):
+    def get(self, request):
+        userid=0
+        user=UserInfo.objects.get(id=userid)
+        loginTime=[]
+        for log in user.log:
+            if log[1]=='login':
+                loginTime.append(log[0])
+        loginTime.append(datetime.datetime.now().timestamp())
+        loginPos=0
+        rate=0
+        rightsum=0
+        wrongsum=0
+        data={'score':[],'time':[]}
+        for problemlog in UserInfo.objects.get(id=userid).problemlog:
+            if problemlog[0]>loginTime[loginPos+1]:
+                if rightsum+wrongsum!=0:
+                    rate=rightsum/(rightsum+wrongsum)
+                data['score'].append(int(rate*100))
+                data['time'].append(loginTime[loginPos])
+                loginPos+=1
+                if loginPos+1>=len(loginTime):
+                    break
+            if problemlog[2]==True:
+                rightsum+=1
+            else:
+                wrongsum+=1
+
+        response=request_template.copy()
+        response['data']=data
+        return JsonResponse(response)

@@ -12,6 +12,6 @@ class UserInfo(models.Model):
     problems = models.JSONField(default=list)   #[num],自己创建的题目
     problemGroups = models.JSONField(default=list)  #[num],自己创建的题目组
     head = models.ImageField(upload_to='static/img/', default='static/img/default.png')  #头像
-    log = models.JSONField(default=list)    #日志
-    problemlog = models.JSONField(default=list)    #[(时间,题目id,正误)],错题日志
+    log = models.JSONField(default=list)    #日志[(timestamp,str),...]str->'register','login','logout'
+    problemlog = models.JSONField(default=list)    #错题日志,[(timestamp,题目id,true/false(正误))]
     token = models.CharField(max_length=512)
