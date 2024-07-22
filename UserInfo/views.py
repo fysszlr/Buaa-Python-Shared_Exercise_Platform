@@ -52,10 +52,9 @@ class UpdateAvatarView(APIView):
         return JsonResponse(json_response(True, 0, {}))
 
 class UpdateStudentIdView(APIView):
-    permission_classes = [IsAuthenticated]
     def post(self, request):
         token = request.GET.get('token')
-        user = None
+        user, _ = user_authenticate(token)
         for it in UserInfo.objects.all():
             if it.token == token:
                 user = it
