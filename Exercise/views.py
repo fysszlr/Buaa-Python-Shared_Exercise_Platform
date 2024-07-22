@@ -6,6 +6,12 @@ from backend.models import *
 from UserInfo.views import getUserId
 import json
 from django.core.cache import cache
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from PIL import Image
+import pytesseract
+import os
 # Create your views here.
 
 class createExercise(View):
@@ -177,4 +183,39 @@ class searchExercise(View):
 
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}
+        return JsonResponse(response)
+
+class OCR(View):
+    # def get(self, request):
+    #     return render(request,'index.html')
+    def post(self, request):
+        # 获取上传的文件
+        uploaded_file = request.FILES.get('avatar')
+        page = request.POST.get('page', 1)
+
+        response=request_template.copy()
+
+        if not uploaded_file:
+            response['success']=False
+            response['errCode']=400602
+            return JsonResponse(response)
+
+        # 保存上传的文件
+        file_path = os.path.join('Exercise/ocr_img', uploaded_file.name)
+        with open(file_path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        # 打开图像并进行OCR识别
+        try:
+            image = Image.open(file_path)
+            text = pytesseract.image_to_string(image, lang="chi_sim+eng")
+            os.remove(file_path)  # 处理完毕后删除文件
+        except Exception as e:
+            response['success']=False
+            response['errCode']=400602
+            return JsonResponse(response)
+
+        # 返回OCR结果
+        response['data'] = {'text': text}
         return JsonResponse(response)
