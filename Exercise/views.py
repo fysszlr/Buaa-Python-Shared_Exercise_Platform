@@ -15,6 +15,7 @@ from django.views.decorators.http import require_POST
 from PIL import Image
 import pytesseract
 import os
+import fitz
 # Create your views here.
 
 class createExercise(View):
@@ -217,7 +218,7 @@ class OCR(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         # 获取上传的文件
-        uploaded_file = request.FILES.get('avatar')
+        uploaded_file = request.FILES.get('file')
         page = request.POST.get('page', 1)
 
         response=request_template.copy()
@@ -228,10 +229,23 @@ class OCR(View):
             return JsonResponse(response)
 
         # 保存上传的文件
-        file_path = os.path.join('Exercise/ocr_img', uploaded_file.name)
+        file_path = os.path.join('Exercise/ocr', uploaded_file.name)
         with open(file_path, 'wb+') as destination:
             for chunk in uploaded_file.chunks():
                 destination.write(chunk)
+
+        if uploaded_file.name[-4:] == '.pdf':
+            try:
+                pdf_document = fitz.open(file_path)
+                pdfpage = pdf_document.load_page(page)
+                text = pdfpage.get_text().split()
+                os.remove(file_path)  # 处理完毕后删除文件
+            except Exception as e:
+                response['success'] = False
+                response['errCode'] = 400602
+                return JsonResponse(response)
+            response['data'] = {'text': text}
+            return JsonResponse(response)
 
         # 打开图像并进行OCR识别
         try:
