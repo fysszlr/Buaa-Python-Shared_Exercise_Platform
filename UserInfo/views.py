@@ -23,6 +23,8 @@ class GetCurrentUserInfoView(APIView):
     def get(self, request):
         token = request.GET.get('token')
         user, _ = user_authenticate(token)
+        if not user:
+            return JsonResponse(json_response(False, 99991,{}))
         for it in UserInfo.objects.all():
             if it.token == token:
                 user = it
@@ -30,7 +32,7 @@ class GetCurrentUserInfoView(APIView):
         assert (user is not None)
         response_data = {
             'username': user.username,
-            'avatar': user.head,
+            'avatar': request.build_absolute_uri(user.head.url) if user.head else "",
             'studentid': user.studentId,
         }
         return JsonResponse(json_response(True, 0, response_data))
@@ -40,6 +42,8 @@ class UpdateAvatarView(APIView):
     def post(self, request):
         token = request.GET.get('token')
         user, _ = user_authenticate(token)
+        if not user:
+            return JsonResponse(json_response(False, 99991,{}))
         for it in UserInfo.objects.all():
             if it.token == token:
                 user = it
@@ -49,12 +53,14 @@ class UpdateAvatarView(APIView):
         head = data['newavatar']
         user.head = head
         user.save()
-        return JsonResponse(json_response(True, 0, {}))
+        return JsonResponse(json_response(True, 0, {"avatarurl":request.build_absolute_uri(user.head.url) if user.head else ""}))
 
 class UpdateStudentIdView(APIView):
     def post(self, request):
         token = request.GET.get('token')
         user, _ = user_authenticate(token)
+        if not user:
+            return JsonResponse(json_response(False, 99991,{}))
         for it in UserInfo.objects.all():
             if it.token == token:
                 user = it
