@@ -14,6 +14,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 import json
+from backend.authentications import user_authenticate, admin_authenticate
 
 
 def generate_token(user):
@@ -29,19 +30,22 @@ def json_response(success, errCode, data):
 
 
 class GetAllUser(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
+        if not auth:
+            pass
         users = []
-        for user in User.objects.all():
+        for user in UserInfo.objects.all():
             flag = False
             for it in BannedUser.objects.all():
                 if user.id == it.user_id:
                     flag = True
             now = {
                 "userid": user.id,
-                "username": user.username,
-                "avatarurl": user.head,
+                "username": user.name,
+                "avatarurl": request.build_absolute_uri(user.head.url) if user.head else "",
                 "studentid": str(user.studentId) + "_EMPTY",
                 "isblock": flag
             }
@@ -50,9 +54,9 @@ class GetAllUser(APIView):
 
 
 class BlockUser(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
         data = json.loads(request.body)
         userid = data["userid"]
         user = User.objects.get(id=userid)
@@ -64,9 +68,9 @@ class BlockUser(APIView):
 
 
 class UnblockUser(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
         data = json.loads(request.body)
         userid = data["userid"]
         user = User.objects.get(id=userid)
@@ -79,9 +83,10 @@ class UnblockUser(APIView):
 
 # 补充page参数缺失情况
 class GetAllExercise(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
         data = json.loads(request.body)
         page = data["page"]
         pages = len(Problem.objects.get()) // 20
@@ -106,8 +111,9 @@ class GetAllExercise(APIView):
         return JsonResponse(json_response(True, 0, thispage))
 
 class BlockExercise(APIView):
-    permission_classes = [IsAuthenticated]
     def post(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
         data = json.loads(request.body)
         exerciseid = data["exerciseid"]
         for problem in Problem.objects.all():
@@ -117,8 +123,9 @@ class BlockExercise(APIView):
         return JsonResponse(json_response(False, 200501, {}))
 
 class UnblockExercise(APIView):
-    permission_classes = [IsAuthenticated]
     def post(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
         data = json.loads(request.body)
         exerciseid = data["exerciseid"]
         for problem in Problem.objects.all():
@@ -128,8 +135,9 @@ class UnblockExercise(APIView):
         return JsonResponse(json_response(False, 200601, {}))
 
 class GetAllAdmin(APIView):
-    permission_classes = [IsAuthenticated]
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
         admins = []
         for admin in AdminInfo.objects.all():
             now = {
@@ -140,8 +148,9 @@ class GetAllAdmin(APIView):
         return JsonResponse(json_response(True, 0, admins))
 
 class CreateAdmin(APIView):
-    permission_classes = [IsAuthenticated]
     def post(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
         data = json.loads(request.body)
         admin_name = data["adminname"]
         password = data["password"]
@@ -152,8 +161,9 @@ class CreateAdmin(APIView):
         return JsonResponse(json_response(True, 0, {}))
 
 class DeleteAdmin(APIView):
-    permission_classes = [IsAuthenticated]
     def delete(self, request):
+        token = request.GET.get('token')
+        auth, _ = admin_authenticate(token)
         data = json.loads(request.body)
         admin_id = data["adminid"]
         admin = AdminInfo.objects.get(id=admin_id)

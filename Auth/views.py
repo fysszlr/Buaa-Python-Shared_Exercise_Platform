@@ -33,18 +33,19 @@ class UserRegisterView(APIView):
         return render(request, 'create_customer.html')
 
     def post(self, request):
-        # data = json.loads(request.body)
-        # username = data['username']
-        # password = data['password']
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        data = json.loads(request.body)
+        username = data['username']
+        password = data['password']
+        # username = request.POST.get('username')
+        # password = request.POST.get('password')
         # avatar = request.FILES.get('avatar')
 
         user = UserInfo.objects.get(username=username)
         if user is not None:
             return JsonResponse(json_response(False, 100201, {}))
         else:
-            UserInfo.objects.create(username=username, password=password)
+            user = UserInfo.objects.create(username=username, password=password)
+            user.head = ""
             return JsonResponse(json_response(True, 0, {}))
 
 
@@ -53,14 +54,14 @@ class UserLoginView(APIView):
         return render(request, 'login_customer.html')
 
     def post(self, request):
-        # data = json.loads(request.body)
-        # username = data['username']
-        # password = data['password']
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = AdminInfo.objects.get(name=username)
+        data = json.loads(request.body)
+        username = data['username']
+        password = data['password']
+        # username = request.POST.get('username')
+        # password = request.POST.get('password')
+        user = UserInfo.objects.get(name=username)
 
-        print(user)
+        print(user.name)
         if user is not None and user.password == password:
             flag = False
             for it in BannedUser.objects.all():
@@ -83,14 +84,13 @@ class AdminLoginView(APIView):
         return render(request, 'login_admin.html')
 
     def post(self, request):
-        # data = json.loads(request.body)
-        # adminname = data['adminname']
-        # password = data['password']
-        adminname = request.POST.get('adminname')
-        password = request.POST.get('password')
+        data = json.loads(request.body)
+        adminname = data['adminname']
+        password = data['password']
+        # adminname = request.POST.get('adminname')
+        # password = request.POST.get('password')
         user = AdminInfo.objects.get(name=adminname)
 
-        print(user)
         if user is not None and user.password == password:
             token = generate_token(user)
             user.token = token

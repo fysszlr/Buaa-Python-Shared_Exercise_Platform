@@ -7,6 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from .models import UserInfo
 import json
 from backend.models import *
+from backend.authentications import user_authenticate
 
 
 # Create your views here.
@@ -19,10 +20,9 @@ def json_response(success, errCode, data):
 
 
 class GetCurrentUserInfoView(APIView):
-    permission_classes = [IsAuthenticated]
     def get(self, request):
         token = request.GET.get('token')
-        user = None
+        user, _ = user_authenticate(token)
         for it in UserInfo.objects.all():
             if it.token == token:
                 user = it
@@ -37,10 +37,9 @@ class GetCurrentUserInfoView(APIView):
 
 # 有问题
 class UpdateAvatarView(APIView):
-    permission_classes = [IsAuthenticated]
     def post(self, request):
         token = request.GET.get('token')
-        user = None
+        user, _ = user_authenticate(token)
         for it in UserInfo.objects.all():
             if it.token == token:
                 user = it
