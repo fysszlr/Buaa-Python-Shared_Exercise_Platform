@@ -49,7 +49,7 @@ class UpdateAvatarView(APIView):
                 user = it
         assert (user is not None)
 
-        head = request.POST.get('newavatar')
+        head = request.FILES.get('newavatar')
         user.head = head
         user.save()
         return JsonResponse(json_response(True, 0, {"avatarurl":request.build_absolute_uri(user.head.url) if user.head else ""}))
