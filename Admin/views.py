@@ -35,7 +35,7 @@ class GetAllUser(APIView):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            pass
+            return JsonResponse(json_response(False, 99991,{}))
         users = []
         for user in UserInfo.objects.all():
             flag = False
@@ -57,6 +57,8 @@ class BlockUser(APIView):
     def post(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991,{}))
         data = json.loads(request.body)
         userid = data["userid"]
         user = User.objects.get(id=userid)
@@ -71,6 +73,8 @@ class UnblockUser(APIView):
     def post(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991,{}))
         data = json.loads(request.body)
         userid = data["userid"]
         user = User.objects.get(id=userid)
@@ -87,6 +91,8 @@ class GetAllExercise(APIView):
     def get(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991,{}))
         data = json.loads(request.body)
         page = data["page"]
         pages = len(Problem.objects.get()) // 20
@@ -114,6 +120,8 @@ class BlockExercise(APIView):
     def post(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991,{}))
         data = json.loads(request.body)
         exerciseid = data["exerciseid"]
         for problem in Problem.objects.all():
@@ -126,6 +134,8 @@ class UnblockExercise(APIView):
     def post(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991,{}))
         data = json.loads(request.body)
         exerciseid = data["exerciseid"]
         for problem in Problem.objects.all():
@@ -138,6 +148,8 @@ class GetAllAdmin(APIView):
     def get(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991,{}))
         admins = []
         for admin in AdminInfo.objects.all():
             now = {
@@ -151,6 +163,8 @@ class CreateAdmin(APIView):
     def post(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991,{}))
         data = json.loads(request.body)
         admin_name = data["adminname"]
         password = data["password"]
@@ -164,6 +178,8 @@ class DeleteAdmin(APIView):
     def delete(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991,{}))
         data = json.loads(request.body)
         admin_id = data["adminid"]
         admin = AdminInfo.objects.get(id=admin_id)
