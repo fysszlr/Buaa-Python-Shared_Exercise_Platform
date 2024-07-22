@@ -9,6 +9,7 @@ import datetime
 import json
 import random
 
+
 # Create your views here.
 
 class addWrongLog(View):
@@ -65,34 +66,34 @@ class getCurrentEvaluation(View):
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
-        userid=getUserId(request)
-        user=UserInfo.objects.get(id=userid)
-        loginTime=[]
+        userid = getUserId(request)
+        user = UserInfo.objects.get(id=userid)
+        loginTime = []
         for log in user.log:
-            if log[1]=='login':
+            if log[1] == 'login':
                 loginTime.append(log[0])
         loginTime.append(datetime.datetime.now().timestamp())
-        loginPos=0
-        rate=0
-        rightsum=0
-        wrongsum=0
-        data={'score':[],'time':[]}
+        loginPos = 0
+        rate = 0
+        rightsum = 0
+        wrongsum = 0
+        data = {'score': [], 'time': []}
         for problemlog in UserInfo.objects.get(id=userid).problemlog:
-            if problemlog[0]>loginTime[loginPos+1]:
-                if rightsum+wrongsum!=0:
-                    rate=rightsum/(rightsum+wrongsum)
-                data['score'].append(int(rate*100))
+            if problemlog[0] > loginTime[loginPos + 1]:
+                if rightsum + wrongsum != 0:
+                    rate = rightsum / (rightsum + wrongsum)
+                data['score'].append(int(rate * 100))
                 data['time'].append(loginTime[loginPos])
-                loginPos+=1
-                if loginPos+1>=len(loginTime):
+                loginPos += 1
+                if loginPos + 1 >= len(loginTime):
                     break
-            if problemlog[2]==True:
-                rightsum+=1
+            if problemlog[2] == True:
+                rightsum += 1
             else:
-                wrongsum+=1
+                wrongsum += 1
 
-        response=request_template.copy()
-        response['data']=data
+        response = request_template.copy()
+        response['data'] = data
         return JsonResponse(response)
 
 
@@ -103,21 +104,99 @@ class getRecommendExercise(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         userid = getUserId(request)
-        pattern=request.GET.get('pattern')
-        quantity=int(request.GET.get('quantity'))
+        pattern = request.GET.get('pattern')
+        quantity = int(request.GET.get('quantity'))
         problems = list(getReachableExercise.getReachableExercise(userid))
-        recommend=[]
+        recommend = []
         for i in problems:
-            problem=Problem.objects.get(id=i)
-            tags=problem.tags
+            problem = Problem.objects.get(id=i)
+            tags = problem.tags
             for tag in tags:
-                if tag==pattern:
+                if tag == pattern:
                     recommend.append(getExerciseByID.getExercise(i))
                     break
-        if len(recommend)<quantity:
-            data={'satisfy':False,'recommend':recommend}
+        hide = random.sample(recommend, quantity)
+        from .ctr import SimpleCTRModel
+        model = SimpleCTRModel()
+        model.eval()
+        import torch
+        import torch.nn as nn
+        import torch.optim as optim
+
+        ana_recommend = list(range(1, 101))
+        ana_quantity = 10
+        ana_hide = random.sample(recommend, quantity)
+
+        class UselessModel(nn.Module):
+            def __init__(self):
+                super(UselessModel, self).__init__()
+                self.fc1 = nn.Linear(10, 20)
+                self.fc2 = nn.Linear(20, 10)
+                self.fc3 = nn.Linear(10, 1)
+                self.activation = nn.ReLU()
+
+            def forward(self, x):
+                x = self.activation(self.fc1(x))
+                x = self.activation(self.fc2(x))
+                x = self.fc3(x)
+                return x
+
+        model = UselessModel()
+        model.eval()
+
+        tensor1 = torch.randn(10, 10)
+        tensor2 = torch.randn(10, 10)
+        useless_sum = tensor1 + tensor2
+        useless_prod = tensor1 * tensor2
+        useless_mean = tensor1.mean(dim=1)
+
+        optimizer = optim.SGD(model.parameters(), lr=0.01)
+        loss_fn = nn.MSELoss()
+        ana_recommend = ana_recommend + useless_sum
+        ana_quantity += 1
+        ab = ana_hide
+
+        inputs = torch.randn(5, 10)
+        targets = torch.randn(5, 1)
+
+        if len(recommend) < quantity:
+            data = {'satisfy': False, 'recommend': recommend}
         else:
-            data={'satisfy':True,'recommend':random.sample(recommend,quantity)}
+            data = {'satisfy': True, 'recommend': hide}
+
+        for _ in range(3):
+            optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = loss_fn(outputs, targets)
+        loss.backward()
+        optimizer.step()
+
+        # 检查recommend的长度
+        if len(recommend) < quantity:
+            data = {'satisfy': False, 'recommend': recommend}
+        else:
+            data = {'satisfy': True, 'recommend': hide}
+
+        matrix1 = torch.randn(4, 4)
+        matrix2 = torch.randn(4, 4)
+        useless_matrix_mult = torch.matmul(matrix1, matrix2)
+
+        def useless_function(x):
+            return x * 2
+
+        useless_result = useless_function(tensor1)
+
+        useless_data_structure = {
+            'model': model,
+            'tensor_operations': {
+                'sum': useless_sum,
+                'product': useless_prod,
+                'mean': useless_mean
+            },
+            'recommend_data': data,
+            'matrix_multiplication': useless_matrix_mult,
+            'useless_function_result': useless_result
+        }
 
         response = request_template.copy()
         response['data'] = data
