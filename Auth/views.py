@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 from UserInfo.models import UserInfo
+from backend.authentications import admin_authenticate, user_authenticate
 from backend.models import *
 import datetime
 from rest_framework.views import APIView
@@ -33,11 +34,8 @@ class UserRegisterView(APIView):
         return render(request, 'create_customer.html')
 
     def post(self, request):
-        data = json.loads(request.body)
-        username = data['username']
-        password = data['password']
-        # username = request.POST.get('username')
-        # password = request.POST.get('password')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
         # avatar = request.FILES.get('avatar')
 
         user = UserInfo.objects.get(username=username)
@@ -54,12 +52,12 @@ class UserLoginView(APIView):
         return render(request, 'login_customer.html')
 
     def post(self, request):
-        data = json.loads(request.body)
-        username = data['username']
-        password = data['password']
-        # username = request.POST.get('username')
-        # password = request.POST.get('password')
-        user = UserInfo.objects.get(name=username)
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        try:
+            user = UserInfo.objects.get(name=username)
+        except:
+            return JsonResponse(json_response(False, 100101, {}))
 
         print(user.name)
         if user is not None and user.password == password:
@@ -84,11 +82,8 @@ class AdminLoginView(APIView):
         return render(request, 'login_admin.html')
 
     def post(self, request):
-        data = json.loads(request.body)
-        adminname = data['adminname']
-        password = data['password']
-        # adminname = request.POST.get('adminname')
-        # password = request.POST.get('password')
+        adminname = request.POST.get('adminname')
+        password = request.POST.get('password')
         user = AdminInfo.objects.get(name=adminname)
 
         if user is not None and user.password == password:
@@ -99,16 +94,26 @@ class AdminLoginView(APIView):
         else:
             return JsonResponse(json_response(False, 100301, {}))
 
+
 class LogoutView(APIView):
     def post(self, request):
-        response = request_template.copy()
-        token = request.GET.get('token')
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         user = UserInfo.objects.get(token=token)
+        user.token = ''
+        user.save()
         return JsonResponse(json_response(True, 0, {}))
+
 
 class AdminLogoutView(APIView):
     def post(self, request):
-        response = request_template.copy()
-        token = request.GET.get('token')
+        token = request.POST.get('token')
+        auth, _ = admin_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         user = AdminInfo.objects.get(token=token)
+        user.token = ''
+        user.save()
         return JsonResponse(json_response(True, 0, {}))

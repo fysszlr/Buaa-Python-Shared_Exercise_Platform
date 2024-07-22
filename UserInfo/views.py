@@ -22,8 +22,8 @@ def json_response(success, errCode, data):
 class GetCurrentUserInfoView(APIView):
     def get(self, request):
         token = request.GET.get('token')
-        user, _ = user_authenticate(token)
-        if not user:
+        auth, _ = user_authenticate(token)
+        if not auth:
             return JsonResponse(json_response(False, 99991,{}))
         for it in UserInfo.objects.all():
             if it.token == token:
@@ -40,34 +40,32 @@ class GetCurrentUserInfoView(APIView):
 # 有问题
 class UpdateAvatarView(APIView):
     def post(self, request):
-        token = request.GET.get('token')
-        user, _ = user_authenticate(token)
-        if not user:
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
             return JsonResponse(json_response(False, 99991,{}))
         for it in UserInfo.objects.all():
             if it.token == token:
                 user = it
         assert (user is not None)
 
-        data = json.loads(request.body)
-        head = data['newavatar']
+        head = request.POST.get('newavatar')
         user.head = head
         user.save()
         return JsonResponse(json_response(True, 0, {"avatarurl":request.build_absolute_uri(user.head.url) if user.head else ""}))
 
 class UpdateStudentIdView(APIView):
     def post(self, request):
-        token = request.GET.get('token')
-        user, _ = user_authenticate(token)
-        if not user:
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
             return JsonResponse(json_response(False, 99991,{}))
         for it in UserInfo.objects.all():
             if it.token == token:
                 user = it
         assert (user is not None)
 
-        data = json.loads(request.body)
-        new_student_id = data['newstudentid']
+        new_student_id = request.POST.get('newstudentid')
         user.studentid = new_student_id
         user.save()
         return JsonResponse(json_response(True, 0, {'studentid': new_student_id}))
