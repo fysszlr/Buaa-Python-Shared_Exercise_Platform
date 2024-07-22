@@ -7,4 +7,5 @@ urlpatterns = [
     path('getReachableExercise/', views.getReachableExercise.as_view(), name='get_reachable_exercise'),
     path('getExerciseByID/', views.getExerciseByID.as_view(), name='get_exercise_by_id'),
     path('searchExercise/', views.searchExercise.as_view(), name='search_exercise'),
+    path('OCR/', views.OCR.as_view(), name='OCR')
 ]
