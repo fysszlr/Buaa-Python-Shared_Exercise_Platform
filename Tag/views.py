@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponse, JsonResponse
+
+from Auth.views import json_response
 from UserInfo.models import UserInfo
+from backend.authentications import user_authenticate
 from backend.models import *
 from UserInfo.views import getUserId
 import json
@@ -13,9 +16,12 @@ class createTag(View):
     #     return render(request, 'create_tag.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        tagname = data['tagname']
+        tagname = request.POST.get('tagname')
         userid = getUserId(request)
 
         if ProblemGroup.objects.filter(name=tagname).exists():
@@ -35,10 +41,13 @@ class addExerciseToTag(View):
     #     return render(request, 'add_exercise_to_tag.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        tagid = data['tagid']
-        exerciseid = data['exerciseid']
+        tagid = request.POST.get('tagid')
+        exerciseid = request.POST.get('exerciseid')
         userid = getUserId(request)
 
         if ProblemGroup.objects.filter(id=tagid).exists() == False:
@@ -62,6 +71,10 @@ class addExerciseToTag(View):
 
 class getExerciseFromTag(View):
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         from Exercise.views import getExerciseByID
         tagid = request.GET.get('tagid')
         page = int(request.GET.get('page'))
@@ -85,6 +98,10 @@ class getExerciseFromTag(View):
 
 class getCurrentUserTag(View):
     def get(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         userid = getUserId(request)
         tags = []
         for i in UserInfo.objects.get(id=userid).problemGroups:

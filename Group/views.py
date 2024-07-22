@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import HttpResponse, JsonResponse
+
+from Auth.views import json_response
 from UserInfo.models import UserInfo
+from backend.authentications import user_authenticate
 from backend.models import *
 from UserInfo.views import getUserId
 import json
@@ -12,9 +15,12 @@ class createGroup(View):
     #     return render(request, 'create_group.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        groupname = data['groupname']
+        groupname = request.POST.get('groupname')
         userid = getUserId(request)
 
         # if UserGroup.objects.filter(name=groupname).exists():
@@ -36,9 +42,12 @@ class deleteGroup(View):
     #     return render(request, 'delete_group.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        groupid = data['groupid']
+        groupid = request.POST.get('groupid')
         userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
@@ -63,9 +72,12 @@ class joinGroup(View):
     #     return render(request, 'join_group.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        groupid = data['groupid']
+        groupid = request.POST.get('groupid')
         userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
@@ -89,9 +101,12 @@ class exitGroup(View):
     #     return render(request, 'exit_group.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        groupid = data['groupid']
+        groupid = request.POST.get('groupid')
         userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
@@ -119,10 +134,13 @@ class addTagToGroup(View):
     #     return render(request, 'add_tag_to_group.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        groupid = data['groupid']
-        tagid = data['tagid']
+        groupid = request.POST.get('groupid')
+        tagid = request.POST.get('tagid')
         userid = getUserId(request)
 
         if ProblemGroup.objects.filter(id=tagid).exists() == False:
@@ -147,6 +165,10 @@ class addTagToGroup(View):
 
 class getTagFromGroup(View):
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         groupid = request.GET.get('groupid')
         tags = []
         for i in UserGroup.objects.get(id=groupid).problemGroups:
@@ -162,6 +184,10 @@ class getTagFromGroup(View):
 
 class getCurrentUserGroup(View):
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         userid = getUserId(request)
         groups = []
         for i in UserInfo.objects.get(id=userid).groups:

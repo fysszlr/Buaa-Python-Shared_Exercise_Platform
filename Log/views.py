@@ -16,9 +16,12 @@ class addWrongLog(View):
     #     return render(request, 'add_wrong_log.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        exerciseid = data['exerciseid']
+        exerciseid = request.POST.get('exerciseid')
         userid = getUserId(request)
 
         if Problem.objects.filter(id=exerciseid).exists() == False:
@@ -37,9 +40,12 @@ class addRightLog(View):
     #     return render(request, 'add_right_log.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        data = json.loads(request.body)
-        exerciseid = data['exerciseid']
+        exerciseid = request.POST.get('exerciseid')
         userid = getUserId(request)
 
         if Problem.objects.filter(id=exerciseid).exists() == False:
@@ -55,6 +61,10 @@ class addRightLog(View):
 
 class getCurrentEvaluation(View):
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         userid=getUserId(request)
         user=UserInfo.objects.get(id=userid)
         loginTime=[]
@@ -88,10 +98,13 @@ class getCurrentEvaluation(View):
 
 class getRecommendExercise(View):
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         userid = getUserId(request)
-        getdata=json.loads(request.body)
-        pattern=getdata['pattern']
-        quantity=getdata['quantity']
+        pattern=request.GET.get('pattern')
+        quantity=int(request.GET.get('quantity'))
         problems = list(getReachableExercise.getReachableExercise(userid))
         recommend=[]
         for i in problems:

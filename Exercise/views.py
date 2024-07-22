@@ -1,7 +1,10 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
+
+from Auth.views import json_response
 from UserInfo.models import UserInfo
+from backend.authentications import user_authenticate
 from backend.models import *
 from UserInfo.views import getUserId
 import json
@@ -19,6 +22,10 @@ class createExercise(View):
         return render(request, 'create_exercise.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
         data = json.loads(request.body)
 
@@ -52,6 +59,10 @@ class updateExercise(View):
         return render(request, 'create_exercise.html')
 
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
         data = json.loads(request.body)
         exerciseid = data['exerciseid']
@@ -89,6 +100,10 @@ class updateExercise(View):
 
 class getReachableExercise(View):
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         page = int(request.GET.get('page'))
         problems = set(int)
         userid = getUserId(request)
@@ -127,6 +142,10 @@ class getReachableExercise(View):
 
 class getExerciseByID(View):
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         exerciseid = request.GET.get('exerciseid')
         data = getExerciseByID.getExercise(exerciseid)
         response = request_template.copy()
@@ -159,6 +178,10 @@ class getExerciseByID(View):
 
 class searchExercise(View):
     def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         page = int(request.GET.get('page'))
         type = int(request.GET.get('type'))
         pattern = request.GET.get('pattern')
@@ -189,6 +212,10 @@ class OCR(View):
     # def get(self, request):
     #     return render(request,'index.html')
     def post(self, request):
+        token = request.POST.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
         # 获取上传的文件
         uploaded_file = request.FILES.get('avatar')
         page = request.POST.get('page', 1)
