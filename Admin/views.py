@@ -35,7 +35,7 @@ class GetAllUser(APIView):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
+            return JsonResponse(json_response(False, 99991, {}))
         users = []
         for user in UserInfo.objects.all():
             flag = False
@@ -55,12 +55,11 @@ class GetAllUser(APIView):
 
 class BlockUser(APIView):
     def post(self, request):
-        token = request.GET.get('token')
+        token = request.POST.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
-        data = json.loads(request.body)
-        userid = data["userid"]
+            return JsonResponse(json_response(False, 99991, {}))
+        userid = request.POST.get('userid')
         user = User.objects.get(id=userid)
         if user is not None:
             BannedUser.objects.create(user_id=userid)
@@ -71,12 +70,11 @@ class BlockUser(APIView):
 
 class UnblockUser(APIView):
     def post(self, request):
-        token = request.GET.get('token')
+        token = request.POST.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
-        data = json.loads(request.body)
-        userid = data["userid"]
+            return JsonResponse(json_response(False, 99991, {}))
+        userid = request.POST.get('userid')
         user = User.objects.get(id=userid)
         if user is not None:
             BannedUser.objects.filter(user_id=userid).delete()
@@ -92,12 +90,19 @@ class GetAllExercise(APIView):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
-        data = json.loads(request.body)
-        page = data["page"]
-        pages = len(Problem.objects.get()) // 20
+            return JsonResponse(json_response(False, 99991, {}))
+
+        page = int(request.GET.get('page'))
+        if page < 1:
+            page = 1
+        problems = Problem.objects.all()
+        pages = (len(problems) + 19) // 20
+        if not problems.exists() or page > pages:
+            return JsonResponse(json_response(True, 0, {'pages': pages, 'thispage': []}))
+
         thispage = []
-        for problem in Problem.objects.all()[20 * page:20 * page + 20]:
+        total = len(problems)
+        for problem in Problem.objects.all()[20 * page - 20:min(20 * page, total)]:
             flag = False
             for it in BannedProblem.objects.all():
                 if problem.id == it.problem_id:
@@ -114,42 +119,45 @@ class GetAllExercise(APIView):
                 'is_block': flag
             }
             thispage.append(now)
-        return JsonResponse(json_response(True, 0, thispage))
+        return JsonResponse(json_response(True, 0, {'pages': pages, 'thispage': thispage}))
+
 
 class BlockExercise(APIView):
     def post(self, request):
-        token = request.GET.get('token')
+        token = request.POST.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
-        data = json.loads(request.body)
-        exerciseid = data["exerciseid"]
+            return JsonResponse(json_response(False, 99991, {}))
+
+        exerciseid = request.POST.get('exerciseid')
         for problem in Problem.objects.all():
             if problem.id == exerciseid:
                 BannedProblem.objects.create(problem_id=exerciseid)
                 return JsonResponse(json_response(True, 0, {}))
         return JsonResponse(json_response(False, 200501, {}))
 
+
 class UnblockExercise(APIView):
     def post(self, request):
-        token = request.GET.get('token')
+        token = request.POST.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
-        data = json.loads(request.body)
-        exerciseid = data["exerciseid"]
+            return JsonResponse(json_response(False, 99991, {}))
+
+        exerciseid = request.POST.get('exerciseid')
         for problem in Problem.objects.all():
             if problem.id == exerciseid:
                 BannedProblem.objects.filter(problem_id=exerciseid).delete()
                 return JsonResponse(json_response(True, 0, {}))
         return JsonResponse(json_response(False, 200601, {}))
 
+
 class GetAllAdmin(APIView):
     def get(self, request):
         token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
+            return JsonResponse(json_response(False, 99991, {}))
         admins = []
         for admin in AdminInfo.objects.all():
             now = {
@@ -159,29 +167,31 @@ class GetAllAdmin(APIView):
             admins.append(now)
         return JsonResponse(json_response(True, 0, admins))
 
+
 class CreateAdmin(APIView):
     def post(self, request):
-        token = request.GET.get('token')
+        token = request.POST.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
-        data = json.loads(request.body)
-        admin_name = data["adminname"]
-        password = data["password"]
+            return JsonResponse(json_response(False, 99991, {}))
+
+        admin_name = request.POST.get('adminname')
+        password = request.POST.get('password')
         for admin in AdminInfo.objects.all():
             if admin.admin == admin_name:
                 return JsonResponse(json_response(False, 200801, {}))
         AdminInfo.objects.create(admin_name=admin_name, password=password)
         return JsonResponse(json_response(True, 0, {}))
 
+
 class DeleteAdmin(APIView):
-    def delete(self, request):
-        token = request.GET.get('token')
+    def post(self, request):
+        token = request.POST.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
-            return JsonResponse(json_response(False, 99991,{}))
-        data = json.loads(request.body)
-        admin_id = data["adminid"]
+            return JsonResponse(json_response(False, 99991, {}))
+
+        admin_id = request.POST.get('adminid')
         admin = AdminInfo.objects.get(id=admin_id)
         if admin is None:
             return JsonResponse(json_response(False, 200901, {}))
@@ -189,4 +199,3 @@ class DeleteAdmin(APIView):
             return JsonResponse(json_response(False, 200902, {}))
         AdminInfo.objects.filter(name=admin.name).delete()
         return JsonResponse(json_response(True, 0, {}))
-
