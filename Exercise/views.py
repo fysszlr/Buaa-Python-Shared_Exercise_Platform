@@ -18,6 +18,49 @@ import os
 import fitz
 # Create your views here.
 
+# coding=utf-8
+# 以下代码用于调用文本检测接口。
+from aliyunsdkcore import client
+from aliyunsdkcore.profile import region_provider
+from aliyunsdkgreen.request.v20180509 import TextScanRequest
+import json
+import uuid
+import datetime
+AccessKey_ID='LTAI5tRQUi1ex9w6LKR6wegt'#os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID']
+AccessKey_Secret='ML9sivkp9eTYRTJxRhPzwBmmPEKYTe'#os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET']
+def check_text(text:list):
+    pass
+    clt = client.AcsClient(AccessKey_ID, AccessKey_Secret)
+    region_provider.modify_point('Green', 'cn-shanghai', 'green.cn-shanghai.aliyuncs.com')
+    request = TextScanRequest.TextScanRequest()
+    request.set_accept_format('JSON')
+    tasks=[]
+    for i in text:
+        task={"dataId": str(uuid.uuid1()),
+            "content":i,
+            "time":datetime.datetime.now().microsecond
+            }
+        tasks.append(task)
+    request.set_content(bytearray(json.dumps({"tasks": tasks, "scenes": ["antispam"]}), "utf-8"))
+    response = clt.do_action_with_exception(request)
+    result = json.loads(response)
+    if 200 == result["code"]:
+        taskResults = result["data"]
+        for taskResult in taskResults:
+            if (200 == taskResult["code"]):
+                sceneResults = taskResult["results"]
+                cnt=400204
+                for sceneResult in sceneResults:
+                    suggestion = sceneResult["suggestion"]
+                    if suggestion!='pass':
+                        return cnt
+                    cnt+=1
+            else:
+                return 400205
+    else:
+        return 400205
+    return 0
+
 class createExercise(View):
     def get(self, request):
         return render(request, 'create_exercise.html')
@@ -40,7 +83,11 @@ class createExercise(View):
                 response['errCode'] = 400102
                 return JsonResponse(response)
 
-        # TODO:标题、正文、选项、答案的合规性审查
+        ans=check_text([data['title'],data['content'],data['option'],data['answer']])
+        if ans!=0:
+            response['success'] = False
+            response['errCode'] = ans
+            return JsonResponse(response)
 
         exercise = Problem.objects.create(
             type=data['type'],
@@ -84,7 +131,11 @@ class updateExercise(View):
                 response['errCode'] = 400403
                 return JsonResponse(response)
 
-        # TODO:标题、正文、选项、答案的合规性审查
+        ans=check_text([data['title'],data['content'],data['option'],data['answer']])
+        if ans!=0:
+            response['success'] = False
+            response['errCode'] = ans
+            return JsonResponse(response)
 
         # 更新数据
         exercise = Problem.objects.get(id=exerciseid)
