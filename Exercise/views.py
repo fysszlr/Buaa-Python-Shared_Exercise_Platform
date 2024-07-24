@@ -172,7 +172,9 @@ class getReachableExercise(View):
             problems = problems[20 * (page - 1):min(20 * page, problems.__sizeof__())]
         thispage = []
         for i in problems:
-            thispage.append(getExerciseByID.getExercise(i))
+            exercise=getExerciseByID.getExercise(i)
+            exercise.remove('isBlock')
+            thispage.append(exercise)
 
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}

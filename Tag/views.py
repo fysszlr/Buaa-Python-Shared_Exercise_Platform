@@ -85,6 +85,7 @@ class getExerciseFromTag(View):
         for i in problems:
             exercise = getExerciseByID.getExercise(i)
             if exercise['isBlock'] == False:
+                exercise.remove('isBlock')
                 thispage.append(exercise)
         pages = (thispage.__sizeof__() + 19) // 20
         if page > pages:

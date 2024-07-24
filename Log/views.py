@@ -113,7 +113,9 @@ class getRecommendExercise(View):
             tags = problem.tags
             for tag in tags:
                 if tag == pattern:
-                    recommend.append(getExerciseByID.getExercise(i))
+                    exercise = getExerciseByID.getExercise(i)
+                    exercise.remove('isBlock')
+                    recommend.append(exercise)
                     break
         hide = random.sample(recommend, quantity)
         from .ctr import SimpleCTRModel
