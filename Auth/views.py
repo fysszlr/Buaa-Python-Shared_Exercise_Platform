@@ -38,11 +38,15 @@ class UserRegisterView(APIView):
         password = request.POST.get('password')
         # avatar = request.FILES.get('avatar')
 
-        user = UserInfo.objects.get(username=username)
+        user = None
+        try:
+            user = UserInfo.objects.get(name=username)
+        except:
+            print('none')
         if user is not None:
             return JsonResponse(json_response(False, 100201, {}))
         else:
-            user = UserInfo.objects.create(username=username, password=password)
+            user = UserInfo.objects.create(name=username, password=password)
             user.head = ""
             return JsonResponse(json_response(True, 0, {}))
 
