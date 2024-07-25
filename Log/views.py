@@ -17,7 +17,7 @@ class addWrongLog(View):
     #     return render(request, 'add_wrong_log.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
@@ -41,7 +41,7 @@ class addRightLog(View):
     #     return render(request, 'add_right_log.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))

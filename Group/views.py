@@ -15,7 +15,7 @@ class createGroup(View):
     #     return render(request, 'create_group.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
@@ -42,7 +42,7 @@ class deleteGroup(View):
     #     return render(request, 'delete_group.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
@@ -101,7 +101,7 @@ class exitGroup(View):
     #     return render(request, 'exit_group.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
@@ -134,7 +134,7 @@ class addTagToGroup(View):
     #     return render(request, 'add_tag_to_group.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))

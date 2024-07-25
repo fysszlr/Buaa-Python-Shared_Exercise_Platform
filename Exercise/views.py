@@ -61,13 +61,17 @@ def check_text(text:list):
         return 400205
     return 0
 
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+@method_decorator(csrf_exempt, name='dispatch')
 class createExercise(View):
-    def get(self, request):
-        return render(request, 'create_exercise.html')
+    # def get(self, request):
+    #     return render(request, 'create_exercise.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
+        print(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
@@ -77,7 +81,8 @@ class createExercise(View):
             response['success'] = False
             response['errCode'] = 400101
             return JsonResponse(response)
-        for i in data['tagid']:
+        print(data)
+        for i in data['tag']:
             if ProblemGroup.objects.filter(id=i).exists() == False:
                 response['success'] = False
                 response['errCode'] = 400102
@@ -95,29 +100,31 @@ class createExercise(View):
             content=data['content'],
             option=data.get('option', []),
             answer=data['answer'],
-            tags=data['tagid'],
+            tags=data['tag'],
             author= getUserId(request)
         )
         response['data'] = {'exerciseid': exercise.id}
         return JsonResponse(response)
 
-
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+@method_decorator(csrf_exempt, name='dispatch')
 class updateExercise(View):
     def get(self, request):
         return render(request, 'create_exercise.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
         data = json.loads(request.body)
         exerciseid = data['exerciseid']
-        newdata = data['newdata']
+        data = data['newdata']
         userid = getUserId(request)
 
-        if Problem.objects.filter(id=exerciseid).author != userid:
+        if Problem.objects.filter(id=exerciseid)[0].author != userid:
             response['success'] = False
             response['errCode'] = 400201
             return JsonResponse(response)
@@ -125,7 +132,7 @@ class updateExercise(View):
             response['success'] = False
             response['errCode'] = 400202
             return JsonResponse(response)
-        for i in data['tagid']:
+        for i in data['tag']:
             if ProblemGroup.objects.filter(id=i).exists() == False:
                 response['success'] = False
                 response['errCode'] = 400403
@@ -144,7 +151,7 @@ class updateExercise(View):
         exercise.content = data['content']
         exercise.option = data.get('option', [])
         exercise.answer = data['answer']
-        exercise.tags = data['tagid']
+        exercise.tags = data['tag']
         exercise.save()
         response['data'] = {'exerciseid': exercise.id}
         return JsonResponse(response)
@@ -261,18 +268,21 @@ class searchExercise(View):
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}
         return JsonResponse(response)
-
+from django.utils.decorators import method_decorator
+@method_decorator(csrf_exempt, name='dispatch')
 class OCR(View):
     # def get(self, request):
     #     return render(request,'index.html')
     def post(self, request):
-        token = request.POST.get('token')
+        print('i am here 123')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
+        print('i am here too')
         # 获取上传的文件
         uploaded_file = request.FILES.get('file')
-        page = request.POST.get('page', 1)
+        page = request.GET.get('page', 1)
 
         response=request_template.copy()
 

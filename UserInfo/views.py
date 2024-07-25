@@ -40,7 +40,7 @@ class GetCurrentUserInfoView(APIView):
 # 有问题
 class UpdateAvatarView(APIView):
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991,{}))
@@ -56,7 +56,7 @@ class UpdateAvatarView(APIView):
 
 class UpdateStudentIdView(APIView):
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991,{}))

@@ -16,12 +16,13 @@ class createTag(View):
     #     return render(request, 'create_tag.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
+        print(token)
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        tagname = request.POST.get('tagname')
+        tagname = request.GET.get('tagname')
         userid = getUserId(request)
 
         if ProblemGroup.objects.filter(name=tagname).exists():
@@ -41,7 +42,7 @@ class addExerciseToTag(View):
     #     return render(request, 'add_exercise_to_tag.html')
 
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
@@ -99,7 +100,7 @@ class getExerciseFromTag(View):
 
 class getCurrentUserTag(View):
     def get(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))

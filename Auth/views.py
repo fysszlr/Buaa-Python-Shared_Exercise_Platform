@@ -101,7 +101,8 @@ class AdminLoginView(APIView):
 
 class LogoutView(APIView):
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
+        print(token)
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
@@ -113,7 +114,7 @@ class LogoutView(APIView):
 
 class AdminLogoutView(APIView):
     def post(self, request):
-        token = request.POST.get('token')
+        token = request.GET.get('token')
         auth, _ = admin_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
