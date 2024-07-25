@@ -31,7 +31,7 @@ class GetCurrentUserInfoView(APIView):
 
         assert (user is not None)
         response_data = {
-            'username': user.username,
+            'username': user.name,
             'avatar': request.build_absolute_uri(user.head.url) if user.head else "",
             'studentid': user.studentId,
         }
