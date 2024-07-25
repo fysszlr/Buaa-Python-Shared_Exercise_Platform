@@ -10,7 +10,9 @@ from UserInfo.views import getUserId
 import json
 
 # Create your views here.
-
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+@method_decorator(csrf_exempt, name='dispatch')
 class createTag(View):
     # def get(self, request):
     #     return render(request, 'create_tag.html')
@@ -22,7 +24,7 @@ class createTag(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        tagname = request.GET.get('tagname')
+        tagname = request.POST.get('tagname')
         userid = getUserId(request)
 
         if ProblemGroup.objects.filter(name=tagname).exists():
@@ -30,9 +32,10 @@ class createTag(View):
             response['errCode'] = 500101
             return JsonResponse(response)
         else:
-            tag = ProblemGroup.objects.create(name=tagname, author=userid)
-            UserInfo.objects.get(id=userid).problemGroups.append(tag.id)
-            UserInfo.objects.get(id=userid).save()
+            tag = ProblemGroup.objects.create(name=tagname, creator=userid)
+            user=UserInfo.objects.filter(id=userid)[0]
+            user.problemGroups.append(tag.id)
+            user.save()
             response['data'] = {'tagid': tag.id}
             return JsonResponse(response)
 
@@ -60,8 +63,8 @@ class addExerciseToTag(View):
             response['errCode'] = 500202
             return JsonResponse(response)
 
-        tag = ProblemGroup.objects.get(id=tagid)
-        if tag.author != userid:
+        tag = ProblemGroup.objects.filter(id=tagid)[0]
+        if tag.creator != userid:
             response['success'] = False
             response['errCode'] = 500201
             return JsonResponse(response)
@@ -76,19 +79,26 @@ class getExerciseFromTag(View):
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
+        user = _
         from Exercise.views import getExerciseByID
         tagid = request.GET.get('tagid')
         page = int(request.GET.get('page'))
         problems = []
-        problems = ProblemGroup.objects.get(id=tagid).problems
+        problems = ProblemGroup.objects.filter(id=tagid)[0].problems
         problems = sorted(problems, reverse=True)
         thispage = []
         for i in problems:
             exercise = getExerciseByID.getExercise(i)
             if exercise['isBlock'] == False:
-                exercise.remove('isBlock')
+                exercise.__delitem__('isBlock')
+                tags=exercise['tag']
+                newtags=[]
+                for tag in tags:
+                    if int(tag['tagid']) in user.problemGroups:
+                        newtags.append(tags)
+                exercise['tag']=newtags
                 thispage.append(exercise)
-        pages = (thispage.__sizeof__() + 19) // 20
+        pages = (thispage.__len__() + 19) // 20
         if page > pages:
             thispage = []
         else:
@@ -105,9 +115,10 @@ class getCurrentUserTag(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         userid = getUserId(request)
+        print(userid)
         tags = []
-        for i in UserInfo.objects.get(id=userid).problemGroups:
-            tags.append({'tagid': i, 'tagname': ProblemGroup.objects.get(id=i).name})
+        for i in UserInfo.objects.filter(id=userid)[0].problemGroups:
+            tags.append({'tagid': i, 'tagname': ProblemGroup.objects.filter(id=i)[0].name})
         response = request_template.copy()
         response['data'] = {'tag': tags}
         return JsonResponse(response)

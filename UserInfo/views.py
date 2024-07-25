@@ -32,7 +32,7 @@ class GetCurrentUserInfoView(APIView):
         assert (user is not None)
         response_data = {
             'username': user.name,
-            'avatar': request.build_absolute_uri(user.head.url) if user.head else "",
+            'avatarurl': request.build_absolute_uri(user.head.url) if user.head else "",
             'studentid': user.studentId,
         }
         return JsonResponse(json_response(True, 0, response_data))
@@ -66,7 +66,7 @@ class UpdateStudentIdView(APIView):
         assert (user is not None)
 
         new_student_id = request.POST.get('newstudentid')
-        user.studentid = new_student_id
+        user.studentId = new_student_id
         user.save()
         return JsonResponse(json_response(True, 0, {'studentid': new_student_id}))
 

@@ -71,7 +71,6 @@ class createExercise(View):
     def post(self, request):
         token = request.GET.get('token')
         auth, _ = user_authenticate(token)
-        print(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
@@ -81,28 +80,33 @@ class createExercise(View):
             response['success'] = False
             response['errCode'] = 400101
             return JsonResponse(response)
-        print(data)
         for i in data['tag']:
             if ProblemGroup.objects.filter(id=i).exists() == False:
                 response['success'] = False
                 response['errCode'] = 400102
                 return JsonResponse(response)
-
-        ans=check_text([data['title'],data['content'],data['option'],data['answer']])
+        try:
+            ans=check_text([data['title'],data['content'],data['option'],data['answer']])
+        except:
+            ans=400205
         if ans!=0:
             response['success'] = False
             response['errCode'] = ans
             return JsonResponse(response)
 
         exercise = Problem.objects.create(
-            type=data['type'],
+            type=int(data['type']),
             name=data['title'],
             content=data['content'],
             option=data.get('option', []),
             answer=data['answer'],
             tags=data['tag'],
-            author= getUserId(request)
+            creator= getUserId(request)
         )
+        for tagid in exercise.tags:
+            tag=ProblemGroup.objects.filter(id=tagid)[0]
+            tag.problems.append(exercise.id)
+            tag.save()
         response['data'] = {'exerciseid': exercise.id}
         return JsonResponse(response)
 
@@ -124,7 +128,7 @@ class updateExercise(View):
         data = data['newdata']
         userid = getUserId(request)
 
-        if Problem.objects.filter(id=exerciseid)[0].author != userid:
+        if Problem.objects.filter(id=exerciseid)[0].creator != userid:
             response['success'] = False
             response['errCode'] = 400201
             return JsonResponse(response)
@@ -145,7 +149,7 @@ class updateExercise(View):
             return JsonResponse(response)
 
         # 更新数据
-        exercise = Problem.objects.get(id=exerciseid)
+        exercise = Problem.objects.filter(id=exerciseid)[0]
         exercise.type = data['type']
         exercise.name = data['title']
         exercise.content = data['content']
@@ -164,7 +168,7 @@ class getReachableExercise(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         page = int(request.GET.get('page'))
-        problems = set(int)
+        problems = set()
         userid = getUserId(request)
         problems = cache.get(userid)
         if not problems:
@@ -172,7 +176,7 @@ class getReachableExercise(View):
             problems = list(getReachableExercise.getReachableExercise(userid))
             problems = sorted(problems, reverse=True)
             cache.set(userid, problems, 60*15)#缓存15分钟
-        pages = (problems.__sizeof__() + 19) // 20
+        pages = (problems.__len__() + 19) // 20
         if page > pages:
             problems = []
         else:
@@ -185,16 +189,17 @@ class getReachableExercise(View):
 
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}
+        print(response)
         return JsonResponse(response)
 
     def getReachableExercise(userid):
-        problems = set(int)
+        problems = set()
         # 所有共享群组
-        for userGroup in UserInfo.objects.get(id=userid).groups:
-            for problemGroup in UserGroup.objects.get(id=userGroup).problems:
-                problems = problems.union(set(ProblemGroup.objects.get(id=problemGroup).problems))
+        for userGroup in UserInfo.objects.filter(id=userid)[0].groups:
+            for problemGroup in UserGroup.objects.filter(id=userGroup)[0].problemGroups:
+                problems = problems.union(set(ProblemGroup.objects.filter(id=problemGroup)[0].problems))
         # 自己创建的题目
-        problems = problems.union(set(UserInfo.objects.filter(id=userid).problems))
+        problems = problems.union(set(UserInfo.objects.filter(id=userid)[0].problems))
         # 去除被封禁的题目
         for bannedProblem in BannedProblem.objects.all():
             problems.remove(bannedProblem.problem)
@@ -217,10 +222,10 @@ class getExerciseByID(View):
     def getExercise(exerciseid):
         if Problem.objects.filter(id=exerciseid).exists() == False:
             return {}
-        problem = Problem.objects.get(id=exerciseid)
+        problem = Problem.objects.filter(id=exerciseid)[0]
         exercise = {}
         exercise['exerciseid'] = problem.id
-        exercise['createusername'] = UserInfo.objects.get(id=problem.author).name
+        exercise['createusername'] = UserInfo.objects.filter(id=problem.creator)[0].name
         exercise['type'] = problem.type
         exercise['title'] = problem.name
         exercise['content'] = problem.content
@@ -228,7 +233,7 @@ class getExerciseByID(View):
         exercise['answer'] = problem.answer
         tag = []
         for j in problem.tags:
-            tag.append({'tagid': j, 'tagname': ProblemGroup.objects.get(id=j).name})
+            tag.append({'tagid': j, 'tagname': ProblemGroup.objects.filter(id=j)[0].name})
         exercise['tag'] = tag
         if BannedProblem.objects.filter(problem=problem.id).exists():
             exercise['isBlock'] = True
@@ -246,7 +251,7 @@ class searchExercise(View):
         page = int(request.GET.get('page'))
         type = int(request.GET.get('type'))
         pattern = request.GET.get('pattern')
-        problems = set(int)
+        problems = set()
         userid = getUserId(request)
         problems = list(getReachableExercise.getReachableExercise(userid))
         problems = sorted(problems, reverse=True)
@@ -274,15 +279,13 @@ class OCR(View):
     # def get(self, request):
     #     return render(request,'index.html')
     def post(self, request):
-        print('i am here 123')
         token = request.GET.get('token')
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
-        print('i am here too')
         # 获取上传的文件
         uploaded_file = request.FILES.get('file')
-        page = request.GET.get('page', 1)
+        page = int(request.POST.get('page', 1))
 
         response=request_template.copy()
 
@@ -300,7 +303,7 @@ class OCR(View):
         if uploaded_file.name[-4:] == '.pdf':
             try:
                 pdf_document = fitz.open(file_path)
-                pdfpage = pdf_document.load_page(page)
+                pdfpage = pdf_document.load_page(page-1)
                 text = pdfpage.get_text().split()
                 os.remove(file_path)  # 处理完毕后删除文件
             except Exception as e:

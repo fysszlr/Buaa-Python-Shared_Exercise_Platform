@@ -47,7 +47,10 @@ class UserRegisterView(APIView):
             return JsonResponse(json_response(False, 100201, {}))
         else:
             user = UserInfo.objects.create(name=username, password=password)
-            user.head = ""
+            # user.head = ""
+            group = UserGroup.objects.filter(id=1)[0]
+            group.users.append(user.id)
+            group.save()
             return JsonResponse(json_response(True, 0, {}))
 
 

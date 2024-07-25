@@ -45,7 +45,7 @@ class Problem(models.Model):
     content = models.TextField()    #题面
     option = models.JSONField(blank=True, null=True)    #选项
     answer = models.TextField() #答案
-    author = models.IntegerField()  #创建者，用户id
+    creator = models.IntegerField()  #创建者，用户id
 
 #题目组
 class ProblemGroup(models.Model):

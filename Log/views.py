@@ -30,8 +30,8 @@ class addWrongLog(View):
             response['errCode'] = 700101
             return JsonResponse(response)
         timestamp = int(datetime.datetime.now().timestamp())
-        UserInfo.objects.get(id=userid).problemlog.append((timestamp, exerciseid, False))
-        UserInfo.objects.get(id=userid).save()
+        UserInfo.objects.filter(id=userid)[0].problemlog.append((timestamp, exerciseid, False))
+        UserInfo.objects.filter(id=userid)[0].save()
         response['data'] = {'timestamp': timestamp}
         return JsonResponse(response)
 
@@ -54,8 +54,8 @@ class addRightLog(View):
             response['errCode'] = 700201
             return JsonResponse(response)
         timestamp = int(datetime.datetime.now().timestamp())
-        UserInfo.objects.get(id=userid).problemlog.append((timestamp, exerciseid, True))
-        UserInfo.objects.get(id=userid).save()
+        UserInfo.objects.filter(id=userid)[0].problemlog.append((timestamp, exerciseid, True))
+        UserInfo.objects.filter(id=userid)[0].save()
         response['data'] = {'timestamp': timestamp}
         return JsonResponse(response)
 
@@ -67,7 +67,7 @@ class getCurrentEvaluation(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         userid = getUserId(request)
-        user = UserInfo.objects.get(id=userid)
+        user = UserInfo.objects.filter(id=userid)[0]
         loginTime = []
         for log in user.log:
             if log[1] == 'login':
@@ -78,7 +78,7 @@ class getCurrentEvaluation(View):
         rightsum = 0
         wrongsum = 0
         data = {'score': [], 'time': []}
-        for problemlog in UserInfo.objects.get(id=userid).problemlog:
+        for problemlog in UserInfo.objects.filter(id=userid)[0].problemlog:
             if problemlog[0] > loginTime[loginPos + 1]:
                 if rightsum + wrongsum != 0:
                     rate = rightsum / (rightsum + wrongsum)
@@ -109,7 +109,7 @@ class getRecommendExercise(View):
         problems = list(getReachableExercise.getReachableExercise(userid))
         recommend = []
         for i in problems:
-            problem = Problem.objects.get(id=i)
+            problem = Problem.objects.filter(id=i)[0]
             tags = problem.tags
             for tag in tags:
                 if tag == pattern:
