@@ -22,13 +22,13 @@ from django.urls import path
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path('Admin/', include('Admin.urls')),
-    path('Auth/', include('Auth.urls')),
-    path('UserInfo/', include('UserInfo.urls')),
-    path('Exercise/', include('Exercise.urls')),
-    path('Tag/', include('Tag.urls')),
-    path('Group/', include('Group.urls')),
-    path('Log/', include('Log.urls')),
+    path('api/v1/Admin/', include('Admin.urls')),
+    path('api/v1/Auth/', include('Auth.urls')),
+    path('api/v1/UserInfo/', include('UserInfo.urls')),
+    path('api/v1/Exercise/', include('Exercise.urls')),
+    path('api/v1/Tag/', include('Tag.urls')),
+    path('api/v1/Group/', include('Group.urls')),
+    path('api/v1/Log/', include('Log.urls')),
 ]
 
 if settings.DEBUG:

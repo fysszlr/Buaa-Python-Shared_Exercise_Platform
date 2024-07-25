@@ -68,7 +68,7 @@ class BannedProblem(models.Model):
 @receiver(post_migrate)
 def add_initial_data(sender, **kwargs):
     # 创建一个管理员账户
-    if sender.name == 'customer':  # 确保只在特定应用中运行
+    if sender.name == 'backend':  # 确保只在特定应用中运行
         AdminInfo.objects.get_or_create(name='root', password='000000')
         ProblemGroup.objects.get_or_create(name='公共题目组', description='公共题目组', creator=1, problems=[])
 
