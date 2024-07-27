@@ -44,7 +44,7 @@ class Problem(models.Model):
     tags = models.JSONField(default=list)  #标签
     content = models.TextField()    #题面
     option = models.JSONField(blank=True, null=True)    #选项
-    answer = models.TextField() #答案
+    answer = models.JSONField(blank=True, null=True) #答案
     creator = models.IntegerField()  #创建者，用户id
 
 #题目组
@@ -57,12 +57,12 @@ class ProblemGroup(models.Model):
 
 #封禁用户
 class BannedUser(models.Model):
-    user = models.IntegerField()    #[id],用户id
+    user_id = models.IntegerField()    #[id],用户id
     #time = models.DateTimeField()  #封禁时间
 
 #封禁题目
 class BannedProblem(models.Model):
-    problem = models.IntegerField() #[id],用户组id
+    problem_id = models.IntegerField() #[id],用户组id
     #time = models.DateTimeField()  #封禁时间
 
 @receiver(post_migrate)

@@ -107,6 +107,9 @@ class createExercise(View):
             tag=ProblemGroup.objects.filter(id=tagid)[0]
             tag.problems.append(exercise.id)
             tag.save()
+        user = _
+        user.problems.append(exercise.id)
+        user.save()
         response['data'] = {'exerciseid': exercise.id}
         return JsonResponse(response)
 
@@ -180,11 +183,11 @@ class getReachableExercise(View):
         if page > pages:
             problems = []
         else:
-            problems = problems[20 * (page - 1):min(20 * page, problems.__sizeof__())]
+            problems = problems[20 * (page - 1):min(20 * page, problems.__len__())]
         thispage = []
         for i in problems:
             exercise=getExerciseByID.getExercise(i)
-            exercise.remove('isBlock')
+            exercise.pop('isBlock')
             thispage.append(exercise)
 
         response = request_template.copy()
@@ -202,7 +205,7 @@ class getReachableExercise(View):
         problems = problems.union(set(UserInfo.objects.filter(id=userid)[0].problems))
         # 去除被封禁的题目
         for bannedProblem in BannedProblem.objects.all():
-            problems.remove(bannedProblem.problem)
+            problems.pop(bannedProblem.problem_id)
         return problems
 
 
@@ -213,10 +216,16 @@ class getExerciseByID(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         exerciseid = request.GET.get('exerciseid')
+        problem = Problem.objects.filter(id=exerciseid)
+        if not problem.exists():
+            return JsonResponse(json_response(False, 400401, {}))
         data = getExerciseByID.getExercise(exerciseid)
         response = request_template.copy()
-        response['isBlock'] = data.pop('isBlock')
-        response['data'] = data  # 或者data中包含data和isblock？
+        #response['isBlock'] = data.pop('isBlock')
+        print(data)
+        isBlock=data['isBlock']
+        data.pop('isBlock')
+        response['data'] = {'data':data,'isBlock':isBlock}  # 或者data中包含data和isblock？
         return JsonResponse(response)
 
     def getExercise(exerciseid):
@@ -235,7 +244,7 @@ class getExerciseByID(View):
         for j in problem.tags:
             tag.append({'tagid': j, 'tagname': ProblemGroup.objects.filter(id=j)[0].name})
         exercise['tag'] = tag
-        if BannedProblem.objects.filter(problem=problem.id).exists():
+        if BannedProblem.objects.filter(problem_id=problem.id).exists():
             exercise['isBlock'] = True
         else:
             exercise['isBlock'] = False
@@ -249,7 +258,7 @@ class searchExercise(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         page = int(request.GET.get('page'))
-        type = int(request.GET.get('type'))
+        type = request.GET.get('type')
         pattern = request.GET.get('pattern')
         problems = set()
         userid = getUserId(request)
@@ -264,11 +273,11 @@ class searchExercise(View):
             elif type == 'tag':
                 if pattern in exercise['tag']['tagname']:
                     thispage.append(exercise)
-        pages = (thispage.__sizeof__() + 19) // 20
+        pages = (thispage.__len__() + 19) // 20
         if page > pages:
             thispage = []
         else:
-            thispage = thispage[20 * (page - 1):min(20 * page, thispage.__sizeof__())]
+            thispage = thispage[20 * (page - 1):min(20 * page, thispage.__len__())]
 
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}

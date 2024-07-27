@@ -82,6 +82,9 @@ class getExerciseFromTag(View):
         user = _
         from Exercise.views import getExerciseByID
         tagid = request.GET.get('tagid')
+        tag = ProblemGroup.objects.filter(id=tagid)
+        if not tag.exists():
+            return JsonResponse(json_response(False, 500301, {}))
         page = int(request.GET.get('page'))
         problems = []
         problems = ProblemGroup.objects.filter(id=tagid)[0].problems
@@ -95,7 +98,7 @@ class getExerciseFromTag(View):
                 newtags=[]
                 for tag in tags:
                     if int(tag['tagid']) in user.problemGroups:
-                        newtags.append(tags)
+                        newtags.append(tag)
                 exercise['tag']=newtags
                 thispage.append(exercise)
         pages = (thispage.__len__() + 19) // 20
@@ -105,6 +108,28 @@ class getExerciseFromTag(View):
             thispage = thispage[20 * (page - 1):min(20 * page, thispage.__sizeof__())]
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}
+        return JsonResponse(response)
+
+
+class getTagInfoByID(View):
+    def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
+        tagid = request.GET.get('tagid')
+        tag = ProblemGroup.objects.filter(id=tagid)
+        if not tag.exists():
+            return JsonResponse(json_response(False, 500401, {}))
+        tag = tag[0]
+        user = UserInfo.objects.filter(id=tag.creator)[0]
+        data={}
+        data['tagid']=tagid
+        data['tagname']=tag.name
+        data['createusername']=user.name
+        data['createavatarurl']=user.head.url
+        response=request_template.copy()
+        response['data'] = data
         return JsonResponse(response)
 
 

@@ -76,6 +76,7 @@ class UserLoginView(APIView):
             if not flag:
                 token = generate_token(user)
                 user.token = token
+                user.log.append((datetime.datetime.now().timestamp(),'login'))
                 user.save()
                 return JsonResponse(json_response(True, 0, {"token": token}))
             else:
@@ -85,13 +86,17 @@ class UserLoginView(APIView):
 
 
 class AdminLoginView(APIView):
-    def get(self, request):
-        return render(request, 'login_admin.html')
+    # def get(self, request):
+    #     return render(request, 'login_admin.html')
 
     def post(self, request):
         adminname = request.POST.get('adminname')
         password = request.POST.get('password')
-        user = AdminInfo.objects.get(name=adminname)
+        user = AdminInfo.objects.filter(name=adminname)
+        if user.exists():
+            user = user[0]
+        else:
+            user = None
 
         if user is not None and user.password == password:
             token = generate_token(user)

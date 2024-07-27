@@ -11,7 +11,9 @@ import random
 
 
 # Create your views here.
-
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+@method_decorator(csrf_exempt, name='dispatch')
 class addWrongLog(View):
     # def get(self, request):
     #     return render(request, 'add_wrong_log.html')
@@ -30,12 +32,15 @@ class addWrongLog(View):
             response['errCode'] = 700101
             return JsonResponse(response)
         timestamp = int(datetime.datetime.now().timestamp())
-        UserInfo.objects.filter(id=userid)[0].problemlog.append((timestamp, exerciseid, False))
-        UserInfo.objects.filter(id=userid)[0].save()
+        _.problemlog.append((timestamp, exerciseid, False))
+        _.save()
         response['data'] = {'timestamp': timestamp}
         return JsonResponse(response)
 
 
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+@method_decorator(csrf_exempt, name='dispatch')
 class addRightLog(View):
     # def get(self, request):
     #     return render(request, 'add_right_log.html')
@@ -54,8 +59,8 @@ class addRightLog(View):
             response['errCode'] = 700201
             return JsonResponse(response)
         timestamp = int(datetime.datetime.now().timestamp())
-        UserInfo.objects.filter(id=userid)[0].problemlog.append((timestamp, exerciseid, True))
-        UserInfo.objects.filter(id=userid)[0].save()
+        _.append((timestamp, exerciseid, True))
+        _.save()
         response['data'] = {'timestamp': timestamp}
         return JsonResponse(response)
 
@@ -83,7 +88,7 @@ class getCurrentEvaluation(View):
                 if rightsum + wrongsum != 0:
                     rate = rightsum / (rightsum + wrongsum)
                 data['score'].append(int(rate * 100))
-                data['time'].append(loginTime[loginPos])
+                data['time'].append(str(datetime.datetime.fromtimestamp(loginTime[loginPos])))
                 loginPos += 1
                 if loginPos + 1 >= len(loginTime):
                     break
@@ -91,6 +96,10 @@ class getCurrentEvaluation(View):
                 rightsum += 1
             else:
                 wrongsum += 1
+        if rightsum + wrongsum != 0:
+            rate = rightsum / (rightsum + wrongsum)
+            data['score'].append(int(rate * 100))
+            data['time'].append(str(datetime.datetime.fromtimestamp(loginTime[loginPos])))
 
         response = request_template.copy()
         response['data'] = data
@@ -111,15 +120,16 @@ class getRecommendExercise(View):
         for i in problems:
             problem = Problem.objects.filter(id=i)[0]
             tags = problem.tags
-            for tag in tags:
-                if tag == pattern:
-                    exercise = getExerciseByID.getExercise(i)
-                    exercise.remove('isBlock')
-                    recommend.append(exercise)
+            for tagid in tags:
+                if ProblemGroup.objects.filter(id=tagid)[0].name == pattern:
+                    recommend.append(i)
                     break
-        hide = random.sample(recommend, quantity)
+        if quantity>len(recommend) or quantity<0:
+            hide = recommend
+        else:
+            hide = random.sample(recommend, quantity)
         from .ctr import SimpleCTRModel
-        model = SimpleCTRModel()
+        model = SimpleCTRModel(num_features=1000,embedding_dim=32)
         model.eval()
         import torch
         import torch.nn as nn
@@ -127,7 +137,10 @@ class getRecommendExercise(View):
 
         ana_recommend = list(range(1, 101))
         ana_quantity = 10
-        ana_hide = random.sample(recommend, quantity)
+        if quantity>len(recommend) or quantity<0:
+            ana_hide = recommend
+        else:
+            ana_hide = random.sample(recommend, quantity)
 
         class UselessModel(nn.Module):
             def __init__(self):
@@ -154,7 +167,7 @@ class getRecommendExercise(View):
 
         optimizer = optim.SGD(model.parameters(), lr=0.01)
         loss_fn = nn.MSELoss()
-        ana_recommend = ana_recommend + useless_sum
+        #ana_recommend = ana_recommend + useless_sum
         ana_quantity += 1
         ab = ana_hide
 
