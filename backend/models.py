@@ -70,7 +70,7 @@ def add_initial_data(sender, **kwargs):
     # 创建一个管理员账户
     if sender.name == 'backend':  # 确保只在特定应用中运行
         AdminInfo.objects.get_or_create(name='root', password='000000')
-        UserGroup.objects.get_or_create(name='公共用户组', creator=0,users=[],problemGroups=[])
+        UserGroup.objects.get_or_create(name='公共用户组', creator=1,users=[],problemGroups=[])
         BannedUser.objects.get_or_create(user_id=1)
 
 # python manage.py makemigrations
