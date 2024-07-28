@@ -40,6 +40,8 @@ class createTag(View):
             return JsonResponse(response)
 
 
+from django.utils.decorators import method_decorator
+@method_decorator(csrf_exempt, name='dispatch')
 class addExerciseToTag(View):
     # def get(self, request):
     #     return render(request, 'add_exercise_to_tag.html')
@@ -50,9 +52,9 @@ class addExerciseToTag(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        tagid = request.POST.get('tagid')
-        exerciseid = request.POST.get('exerciseid')
-        userid = getUserId(request)
+        tagid = int(request.POST.get('tagid'))
+        exerciseid = int(request.POST.get('exerciseid'))
+        userid = int(getUserId(request))
 
         if ProblemGroup.objects.filter(id=tagid).exists() == False:
             response['success'] = False
@@ -68,8 +70,11 @@ class addExerciseToTag(View):
             response['success'] = False
             response['errCode'] = 500201
             return JsonResponse(response)
-        tag.problems.append(exerciseid)
+        tag.problems.append(int(exerciseid))
         tag.save()
+        problem = Problem.objects.filter(id=exerciseid)[0]
+        problem.tags.append(int(tagid))
+        problem.save()
         return JsonResponse(response)
 
 
@@ -81,7 +86,7 @@ class getExerciseFromTag(View):
             return JsonResponse(json_response(False, 99991, {}))
         user = _
         from Exercise.views import getExerciseByID
-        tagid = request.GET.get('tagid')
+        tagid = int(request.GET.get('tagid'))
         tag = ProblemGroup.objects.filter(id=tagid)
         if not tag.exists():
             return JsonResponse(json_response(False, 500301, {}))
@@ -105,7 +110,7 @@ class getExerciseFromTag(View):
         if page > pages:
             thispage = []
         else:
-            thispage = thispage[20 * (page - 1):min(20 * page, thispage.__sizeof__())]
+            thispage = thispage[20 * (page - 1):min(20 * page, thispage.__len__())]
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}
         return JsonResponse(response)
@@ -117,7 +122,7 @@ class getTagInfoByID(View):
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
-        tagid = request.GET.get('tagid')
+        tagid = int(request.GET.get('tagid'))
         tag = ProblemGroup.objects.filter(id=tagid)
         if not tag.exists():
             return JsonResponse(json_response(False, 500401, {}))

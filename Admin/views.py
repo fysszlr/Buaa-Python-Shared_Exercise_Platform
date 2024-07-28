@@ -64,6 +64,8 @@ class BlockUser(APIView):
         
         if user is not None:
             BannedUser.objects.create(user_id=userid)
+            user.token=''
+            user.save()
             return JsonResponse(json_response(True, 0, {}))
         else:
             return JsonResponse(json_response(False, 200201, {}))

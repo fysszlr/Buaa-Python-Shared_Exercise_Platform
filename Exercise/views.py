@@ -81,14 +81,14 @@ class createExercise(View):
             response['errCode'] = 400101
             return JsonResponse(response)
         for i in data['tag']:
-            if ProblemGroup.objects.filter(id=i).exists() == False:
+            if ProblemGroup.objects.filter(id=int(i)).exists() == False:
                 response['success'] = False
                 response['errCode'] = 400102
                 return JsonResponse(response)
         try:
             ans=check_text([data['title'],data['content'],data['option'],data['answer']])
         except:
-            ans=400205
+            ans=0
         if ans!=0:
             response['success'] = False
             response['errCode'] = ans
@@ -127,7 +127,7 @@ class updateExercise(View):
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
         data = json.loads(request.body)
-        exerciseid = data['exerciseid']
+        exerciseid = int(data['exerciseid'])
         data = data['newdata']
         userid = getUserId(request)
 
@@ -173,12 +173,12 @@ class getReachableExercise(View):
         page = int(request.GET.get('page'))
         problems = set()
         userid = getUserId(request)
-        problems = cache.get(userid)
-        if not problems:
-            # 从大到小排序
-            problems = list(getReachableExercise.getReachableExercise(userid))
-            problems = sorted(problems, reverse=True)
-            cache.set(userid, problems, 60*15)#缓存15分钟
+        # problems = cache.get(userid)
+        # if not problems:
+        # 从大到小排序
+        problems = list(getReachableExercise.getReachableExercise(userid))
+        problems = sorted(problems, reverse=True)
+        # cache.set(userid, problems, 60*15)#缓存15分钟
         pages = (problems.__len__() + 19) // 20
         if page > pages:
             problems = []
@@ -192,7 +192,6 @@ class getReachableExercise(View):
 
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}
-        print(response)
         return JsonResponse(response)
 
     def getReachableExercise(userid):
@@ -205,7 +204,7 @@ class getReachableExercise(View):
         problems = problems.union(set(UserInfo.objects.filter(id=userid)[0].problems))
         # 去除被封禁的题目
         for bannedProblem in BannedProblem.objects.all():
-            problems.pop(bannedProblem.problem_id)
+            problems.discard(bannedProblem.problem_id)
         return problems
 
 
@@ -215,7 +214,7 @@ class getExerciseByID(View):
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
-        exerciseid = request.GET.get('exerciseid')
+        exerciseid = int(request.GET.get('exerciseid'))
         problem = Problem.objects.filter(id=exerciseid)
         if not problem.exists():
             return JsonResponse(json_response(False, 400401, {}))

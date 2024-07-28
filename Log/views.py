@@ -24,7 +24,7 @@ class addWrongLog(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        exerciseid = request.POST.get('exerciseid')
+        exerciseid = int(request.POST.get('exerciseid'))
         userid = getUserId(request)
 
         if Problem.objects.filter(id=exerciseid).exists() == False:
@@ -51,7 +51,7 @@ class addRightLog(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        exerciseid = request.POST.get('exerciseid')
+        exerciseid = int(request.POST.get('exerciseid'))
         userid = getUserId(request)
 
         if Problem.objects.filter(id=exerciseid).exists() == False:
@@ -59,7 +59,7 @@ class addRightLog(View):
             response['errCode'] = 700201
             return JsonResponse(response)
         timestamp = int(datetime.datetime.now().timestamp())
-        _.append((timestamp, exerciseid, True))
+        _.problemlog.append((timestamp, exerciseid, True))
         _.save()
         response['data'] = {'timestamp': timestamp}
         return JsonResponse(response)
@@ -124,6 +124,8 @@ class getRecommendExercise(View):
                 if ProblemGroup.objects.filter(id=tagid)[0].name == pattern:
                     recommend.append(i)
                     break
+        if len(recommend)==0:
+            return JsonResponse(json_response(False, 700401, {}))
         if quantity>len(recommend) or quantity<0:
             hide = recommend
         else:

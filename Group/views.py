@@ -55,14 +55,14 @@ class deleteGroup(APIView):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        groupid = request.POST.get('groupid')
+        groupid = int(request.POST.get('groupid'))
         userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
             response['success'] = False
             response['errCode'] = 600201
             return JsonResponse(response)
-        group = UserGroup.objects.filter(id=userid)[0]
+        group = UserGroup.objects.filter(id=groupid)[0]
         if group.creator != userid:
             response['success'] = False
             response['errCode'] = 600202
@@ -89,7 +89,7 @@ class joinGroup(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        groupid = request.POST.get('groupid')
+        groupid = int(request.POST.get('groupid'))
         userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
@@ -120,7 +120,7 @@ class exitGroup(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        groupid = request.POST.get('groupid')
+        groupid = int(request.POST.get('groupid'))
         userid = getUserId(request)
 
         if UserGroup.objects.filter(id=groupid).exists() == False:
@@ -135,11 +135,11 @@ class exitGroup(View):
             response['success'] = False
             response['errCode'] = 600403
             return JsonResponse(response)
-        group = UserGroup.objects.filter(id=userid)[0]
+        group = UserGroup.objects.filter(id=groupid)[0]
         group.users.remove(userid)
         group.save()
         user = _
-        user.groups.remove(groupid)
+        user.groups.remove(int(groupid))
         user.save()
         return JsonResponse(response)
 
@@ -157,8 +157,8 @@ class addTagToGroup(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         response = request_template.copy()
-        groupid = request.POST.get('groupid')
-        tagid = request.POST.get('tagid')
+        groupid = int(request.POST.get('groupid'))
+        tagid = int(request.POST.get('tagid'))
         userid = getUserId(request)
 
         if ProblemGroup.objects.filter(id=tagid).exists() == False:
@@ -176,8 +176,9 @@ class addTagToGroup(View):
             response['errCode'] = 600502
             return JsonResponse(response)
         group = UserGroup.objects.filter(id=groupid)[0]
-        group.problemGroups.append(int(tagid))
-        group.save()
+        if tagid not in group.problemGroups:
+            group.problemGroups.append(int(tagid))
+            group.save()
         return JsonResponse(response)
 
 
@@ -187,7 +188,7 @@ class getTagFromGroup(View):
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
-        groupid = request.GET.get('groupid')
+        groupid = int(request.GET.get('groupid'))
         group = UserGroup.objects.filter(id=groupid)
         if not group.exists():
             return JsonResponse(json_response(False, 600601, {}))
@@ -216,14 +217,20 @@ class getCurrentUserGroup(View):
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
         userid = getUserId(request)
-        groups = []
-        for i in UserInfo.objects.filter(id=userid)[0].groups:
-            if i==1:
+        groups = [{'groupid':1,'groupname':'公共用户组','createusername':'系统','createavatarurl':'/static/img/default.jpg','iscreater':False}]
+        for j in UserInfo.objects.filter(id=userid)[0].groups:
+            i = int(j)
+            if i == 1:
                 continue
             group = UserGroup.objects.filter(id=i)[0]
             groupinfo = {'groupid': i, 'groupname': group.name}
-            groupinfo['createusername'] = UserInfo.objects.filter(id=group.creator)[0].name
-            groupinfo['createavatarurl'] = UserInfo.objects.filter(id=group.creator)[0].head.url
+            print(group.name,group.id,i)
+            user = UserInfo.objects.filter(id=group.creator)
+            print(len(user))
+            user = user.first()
+            #return JsonResponse({'a':str(len(user))})
+            groupinfo['createusername'] = user.name
+            groupinfo['createavatarurl'] = user.head.url
             groupinfo['iscreater'] = (userid == group.creator)
             groups.append(groupinfo)
         response = request_template.copy()
@@ -240,7 +247,7 @@ class getGroupInfoByID(View):
         auth, _ = user_authenticate(token)
         if not auth:
             return JsonResponse(json_response(False, 99991, {}))
-        groupid = request.GET.get('groupid')
+        groupid = int(request.GET.get('groupid'))
         group = UserGroup.objects.filter(id=groupid)
         if not group.exists():
             return JsonResponse(json_response(False, 600601, {}))

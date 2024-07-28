@@ -74,9 +74,9 @@ class UpdateStudentIdView(APIView):
 def getUserId(request):
     token = request.GET.get('token')
     if cache.get(token) is not None:
-        return cache.get(token)
+        return int(cache.get(token))
     else:
         for it in UserInfo.objects.all():
             if token == it.token:
-                cache.set(token, it.id, timeout=900)
+                cache.set(token, int(it.id), timeout=900)
                 return it.id
