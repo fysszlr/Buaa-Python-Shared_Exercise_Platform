@@ -131,7 +131,7 @@ class exitGroup(View):
             response['success'] = False
             response['errCode'] = 600402
             return JsonResponse(response)
-        if userid == UserGroup.objects.filter(id=userid)[0].creator:
+        if userid == UserGroup.objects.filter(id=groupid)[0].creator:
             response['success'] = False
             response['errCode'] = 600403
             return JsonResponse(response)

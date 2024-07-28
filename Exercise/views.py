@@ -189,6 +189,13 @@ class getReachableExercise(View):
             exercise=getExerciseByID.getExercise(i)
             exercise.pop('isBlock')
             thispage.append(exercise)
+            newtags=[]
+            creator = UserInfo.objects.get(name=exercise['createusername'])
+            for tag in exercise['tag']:
+                if int(tag['tagid']) in creator.problemGroups:
+                    newtags.append(tag)
+            exercise['tag']=newtags
+
 
         response = request_template.copy()
         response['data'] = {'thispage': thispage, 'pages': pages}
@@ -270,8 +277,10 @@ class searchExercise(View):
                 if pattern in exercise['title']:
                     thispage.append(exercise)
             elif type == 'tag':
-                if pattern in exercise['tag']['tagname']:
-                    thispage.append(exercise)
+                # if pattern in exercise['tag']['tagname']:
+                for tag_dict in exercise['tag']:
+                    if pattern in tag_dict['tagname']:
+                        thispage.append(exercise)
         pages = (thispage.__len__() + 19) // 20
         if page > pages:
             thispage = []

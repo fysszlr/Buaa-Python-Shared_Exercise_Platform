@@ -88,7 +88,8 @@ class getCurrentEvaluation(View):
                 if rightsum + wrongsum != 0:
                     rate = rightsum / (rightsum + wrongsum)
                 data['score'].append(int(rate * 100))
-                data['time'].append(str(datetime.datetime.fromtimestamp(loginTime[loginPos])))
+                #data['time'].append(str(datetime.datetime.fromtimestamp(loginTime[loginPos])))
+                data['time'].append(datetime.datetime.fromtimestamp(loginTime[loginPos]).strftime('%Y-%m-%d %H:%M'))
                 loginPos += 1
                 if loginPos + 1 >= len(loginTime):
                     break
@@ -99,7 +100,8 @@ class getCurrentEvaluation(View):
         if rightsum + wrongsum != 0:
             rate = rightsum / (rightsum + wrongsum)
             data['score'].append(int(rate * 100))
-            data['time'].append(str(datetime.datetime.fromtimestamp(loginTime[loginPos])))
+            # data['time'].append(str(datetime.datetime.fromtimestamp(loginTime[loginPos])))
+            data['time'].append(datetime.datetime.fromtimestamp(loginTime[loginPos]).strftime('%Y-%m-%d %H:%M'))
 
         response = request_template.copy()
         response['data'] = data

@@ -101,8 +101,9 @@ class getExerciseFromTag(View):
                 exercise.__delitem__('isBlock')
                 tags=exercise['tag']
                 newtags=[]
+                creator = UserInfo.objects.get(name=exercise['createusername'])
                 for tag in tags:
-                    if int(tag['tagid']) in user.problemGroups:
+                    if int(tag['tagid']) in creator.problemGroups:
                         newtags.append(tag)
                 exercise['tag']=newtags
                 thispage.append(exercise)
