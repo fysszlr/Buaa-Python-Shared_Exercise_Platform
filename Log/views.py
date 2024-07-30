@@ -89,7 +89,7 @@ class getCurrentEvaluation(View):
                     rate = rightsum / (rightsum + wrongsum)
                 data['score'].append(int(rate * 100))
                 #data['time'].append(str(datetime.datetime.fromtimestamp(loginTime[loginPos])))
-                data['time'].append(datetime.datetime.fromtimestamp(loginTime[loginPos]).strftime('%Y-%m-%d %H:%M'))
+                data['time'].append(datetime.datetime.fromtimestamp(loginTime[loginPos] + 28800).strftime('%Y-%m-%d %H:%M'))
                 loginPos += 1
                 if loginPos + 1 >= len(loginTime):
                     break
@@ -101,7 +101,7 @@ class getCurrentEvaluation(View):
             rate = rightsum / (rightsum + wrongsum)
             data['score'].append(int(rate * 100))
             # data['time'].append(str(datetime.datetime.fromtimestamp(loginTime[loginPos])))
-            data['time'].append(datetime.datetime.fromtimestamp(loginTime[loginPos]).strftime('%Y-%m-%d %H:%M'))
+            data['time'].append(datetime.datetime.fromtimestamp(loginTime[loginPos] + 28800).strftime('%Y-%m-%d %H:%M'))
 
         response = request_template.copy()
         response['data'] = data
@@ -123,7 +123,7 @@ class getRecommendExercise(View):
             problem = Problem.objects.filter(id=i)[0]
             tags = problem.tags
             for tagid in tags:
-                if ProblemGroup.objects.filter(id=tagid)[0].name == pattern:
+                if pattern in ProblemGroup.objects.filter(id=tagid)[0].name:
                     recommend.append(i)
                     break
         if len(recommend)==0:

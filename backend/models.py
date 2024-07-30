@@ -76,3 +76,9 @@ def add_initial_data(sender, **kwargs):
 # python manage.py makemigrations
 # python manage.py migrate
 # python manage.py runserver
+
+class Comment(models.Model):
+    problem_id = models.IntegerField()
+    create_user_id = models.IntegerField()
+    time = models.CharField(max_length = 512)
+    content = models.CharField(max_length=512)

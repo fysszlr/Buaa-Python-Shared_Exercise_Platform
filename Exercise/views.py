@@ -343,3 +343,80 @@ class OCR(View):
         # 返回OCR结果
         response['data'] = {'text': text}
         return JsonResponse(response)
+        
+class GetCommentByID(View):
+    def get(self, request):
+        token = request.GET.get('token')
+        auth, _ = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
+        exerciseid = int(request.GET.get('exerciseid'))
+        response=request_template.copy()
+        comment = []
+        for com in Comment.objects.all():
+            if com.problem_id != exerciseid:
+                continue
+            user = UserInfo.objects.get(id = com.create_user_id)
+            now = {
+                'createusername': user.name,
+                'createavatarurl': request.build_absolute_uri(user.head.url) if user.head else "",
+                'time': datetime.datetime.fromtimestamp(float(com.time) + 28800).strftime('%Y-%m-%d %H:%M:%S'),
+                'content': com.content,
+            }
+            comment.append(now)
+        tmp = []
+        for it in range(len(comment)-1 ,-1, -1):
+            tmp.append(comment[it])
+        comment = tmp
+        response['data'] = {'comment' : comment}
+        return JsonResponse(response)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AddComment(View):
+    def post(self, request):
+        token = request.GET.get('token')
+        auth, user = user_authenticate(token)
+        if not auth:
+            return JsonResponse(json_response(False, 99991, {}))
+        exerciseid = int(request.POST.get('exerciseid'))
+        comment = request.POST.get('comment')
+        response = request_template.copy()
+        
+        flag = False
+        for exer in Problem.objects.all():
+            if exerciseid == exer.id:
+                flag = True
+                break
+        
+        if not flag:
+            response['success']=False
+            response['errCose'] = 400801
+            return JsonResponse(response)
+                
+        Comment.objects.create(problem_id = exerciseid, create_user_id = user.id, time = datetime.datetime.now().timestamp(), content = comment)
+        return JsonResponse(response)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
