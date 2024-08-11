@@ -26,8 +26,8 @@ from aliyunsdkgreen.request.v20180509 import TextScanRequest
 import json
 import uuid
 import datetime
-AccessKey_ID='LTAI5tRQUi1ex9w6LKR6wegt'#os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID']
-AccessKey_Secret='ML9sivkp9eTYRTJxRhPzwBmmPEKYTe'#os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET']
+AccessKey_ID=''#os.environ['ALIBABA_CLOUD_ACCESS_KEY_ID']
+AccessKey_Secret=''#os.environ['ALIBABA_CLOUD_ACCESS_KEY_SECRET']
 def check_text(text:list):
     pass
     clt = client.AcsClient(AccessKey_ID, AccessKey_Secret)
