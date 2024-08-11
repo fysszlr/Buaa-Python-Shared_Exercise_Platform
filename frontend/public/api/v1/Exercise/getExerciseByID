@@ -1,0 +1,33 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "isBlock": true,
+        "data": {
+            "exerciseid": 1,
+            "createusername": "hugo",
+            "type": 2,
+            "title": "测试题目1",
+            "content": "这是第一题的正文\n这是第一题的正文",
+            "option": [
+                "选项1",
+                "选项2",
+                "选项3",
+                "选项4"
+            ],
+            "answer": [
+                "C", "A"
+            ],
+            "tag": [
+                {
+                    "tagid": 1,
+                    "tagname": "Python-Chapter1"
+                },
+                {
+                    "tagid": 2,
+                    "tagname": "Python-Chapter1"
+                }
+            ]
+        }
+    }
+}

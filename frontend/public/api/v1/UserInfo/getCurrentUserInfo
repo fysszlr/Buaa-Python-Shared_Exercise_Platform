@@ -1,0 +1,9 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "username": "hugo",
+		"avatarurl": "http://localhost:5173/static/img/default.jpg",
+		"studentid": ""
+    }
+}

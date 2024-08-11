@@ -1,0 +1,16 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "admins": [
+            {
+                "adminid": 1,
+                "adminname": "admin1"
+            },
+            {
+                "adminid": 2,
+                "adminname": "admin2"
+            }
+        ]
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "users": [
+            {
+                "userid": 1,
+                "username": "user1",
+                "avatarurl": "http://localhost:5173/static/img/default.jpg",
+                "studentid": "22371345",
+                "isblock": false
+            },
+            {
+                "userid": 2,
+                "username": "user2",
+                "avatarurl": "http://localhost:5173/static/img/default.jpg",
+                "studentid": "22371346",
+                "isblock": true
+            },
+            {
+                "userid": 3,
+                "username": "user3",
+                "avatarurl": "http://localhost:5173/static/img/another.jpg",
+                "studentid": "",
+                "isblock": false
+            }
+
+        ]
+    }
+}

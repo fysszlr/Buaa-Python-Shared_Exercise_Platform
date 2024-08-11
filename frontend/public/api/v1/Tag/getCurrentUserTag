@@ -1,0 +1,20 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "tag": [
+            {
+                "tagid": 1,
+                "tagname": "Python-Chapter1"
+            },
+            {
+                "tagid": 2,
+                "tagname": "Python-Chapter2"
+            },
+            {
+                "tagid": 3,
+                "tagname": "Python-Chapter3"
+            }
+        ]
+    }
+}

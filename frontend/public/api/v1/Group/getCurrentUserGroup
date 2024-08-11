@@ -1,0 +1,56 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "group": [
+            {
+                "groupid": 1,
+                "groupname": "第1组",
+                "createusername": "ap0stader",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "groupid": 2,
+                "groupname": "第2组",
+                "createusername": "ap0stader",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "groupid": 3,
+                "groupname": "第3组",
+                "createusername": "ap0stader",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "groupid": 4,
+                "groupname": "第4组",
+                "createusername": "ap0stader",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "groupid": 5,
+                "groupname": "第5组",
+                "createusername": "hugo",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "groupid": 6,
+                "groupname": "第6组",
+                "createusername": "hugo",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "groupid": 7,
+                "groupname": "第7组",
+                "createusername": "hugo",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "groupid": 8,
+                "groupname": "第8组",
+                "createusername": "hugo",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            }
+        ]
+    }
+}

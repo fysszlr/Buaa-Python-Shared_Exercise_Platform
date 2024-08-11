@@ -1,0 +1,7 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "text": "This is OCR Result."
+    }
+}

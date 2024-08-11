@@ -1,0 +1,10 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "groupid": 2,
+        "groupname": "第2组",
+        "createusername": "ap0stader",
+        "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+    }
+}

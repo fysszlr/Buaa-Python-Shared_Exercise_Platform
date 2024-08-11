@@ -1,0 +1,32 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "tag": [
+            {
+                "tagid": 1,
+                "tagname": "第1题目组",
+                "createusername": "ap0stader",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "tagid": 2,
+                "tagname": "第2题目组",
+                "createusername": "ap0stader",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "tagid": 3,
+                "tagname": "第3题目组",
+                "createusername": "hugo",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            },
+            {
+                "tagid": 4,
+                "tagname": "第4题目组",
+                "createusername": "hugo",
+                "createavatarurl": "http://localhost:5173/static/img/another.jpg"
+            }
+        ]
+    }
+}

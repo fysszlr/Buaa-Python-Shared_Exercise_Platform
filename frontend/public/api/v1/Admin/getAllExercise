@@ -1,0 +1,103 @@
+{
+    "success": true,
+    "errCode": 0,
+    "data": {
+        "pages": 2,
+        "thispage": [
+            {
+                "exerciseid": 1,
+                "createusername": "hugo",
+                "type": 0,
+                "title": "测试题目1",
+                "content": "这是第一题的正文",
+                "option": [],
+                "answer": [
+                    "A"
+                ],
+                "tag": [
+                    {
+                        "tagid": 1,
+                        "tagname": "Python-Chapter1"
+                    },
+                    {
+                        "tagid": 2,
+                        "tagname": "Python-Chapter1"
+                    }
+                ],
+                "isBlock": false
+            },
+            {
+                "exerciseid": 2,
+                "createusername": "hugo",
+                "type": 1,
+                "title": "测试题目2",
+                "content": "这是第二题的正文",
+                "option": [
+                    "选项A",
+                    "选项B",
+                    "选项C"
+                ],
+                "answer": [
+                    "B"
+                ],
+                "tag": [
+                    {
+                        "tagid": 2,
+                        "tagname": "Python-Chapter1"
+                    }
+                ],
+                "isBlock": false
+            },
+            {
+                "exerciseid": 3,
+                "createusername": "ap0stader",
+                "type": 2,
+                "title": "测试题目3",
+                "content": "这是第三题的正文",
+                "option": [
+                    "选项A",
+                    "选项B",
+                    "选项C",
+                    "选项D"
+                ],
+                "answer": [
+                    "C",
+                    "D"
+                ],
+                "tag": [
+                    {
+                        "tagid": 3,
+                        "tagname": "Python-Chapter3"
+                    }
+                ],
+                "isBlock": false
+            },
+            {
+                "exerciseid": 4000,
+                "createusername": "hugo",
+                "type": 10,
+                "title": "测试题目4",
+                "content": "这是第四题的正文",
+                "option": [],
+                "answer": [
+                    "hugo"
+                ],
+                "tag": [
+                    {
+                        "tagid": 1,
+                        "tagname": "Python-Chapter1"
+                    },
+                    {
+                        "tagid": 2,
+                        "tagname": "Python-Chapter2"
+                    },
+                    {
+                        "tagid": 3,
+                        "tagname": "Python-Chapter3"
+                    }
+                ],
+                "isBlock": true
+            }
+        ]
+    }
+}
